@@ -1,0 +1,14 @@
+{
+    "101": {
+        "group_id": 101,
+        "name": "Python Enthusiasts",
+        "description": "A group for AI and Backend devs",
+        "members": [
+            1,
+            2
+        ],
+        "annonces": [
+            501
+        ]
+    }
+}

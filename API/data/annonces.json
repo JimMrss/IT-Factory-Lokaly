@@ -1,0 +1,15 @@
+{
+    "501": {
+        "annonce_id": 501,
+        "name": "FastAPI Workshop",
+        "interested_users": [
+            1
+        ],
+        "date": "2026-03-15",
+        "hour": "14:30:00",
+        "description": "Learning modular API structures",
+        "location": "Brest, France",
+        "provider": "Admin",
+        "state": "active"
+    }
+}
