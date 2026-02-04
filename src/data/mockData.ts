@@ -78,8 +78,8 @@ export const mockGroupes = [
     id: '3',
     nom: 'Bibliothèque partagée',
     description: 'Échangez vos livres, BD et magazines avec les autres habitants.',
-    niveau: 4,
-    membres: 42,
+    niveau: 5,
+    membres: 56,
     categorie: 'Culture',
     annonces: ['3']
   },

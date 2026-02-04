@@ -10,9 +10,6 @@ interface AdminCustomizationPageProps {
   communaute?: any;
 }
 
-// Liste d'emojis suggérés pour les niveaux
-const SUGGESTED_EMOJIS = ['⭐', '🌟', '✨', '💫', '🔥', '💎', '🏆', '👑', '🌸', '🍀', '🎯', '💪'];
-
 // Jeux de couleurs prédéfinis
 const COLOR_PRESETS = [
   { name: 'Bleu océan', primary: '#3b82f6', secondary: '#10b981' },
@@ -32,9 +29,6 @@ export function AdminCustomizationPage({ communaute }: AdminCustomizationPagePro
   const [nomCommunaute, setNomCommunaute] = useState('Lokaly');
   const [logoUrl, setLogoUrl] = useState('');
   const [messageAccueil, setMessageAccueil] = useState('Bienvenue dans votre communauté !');
-
-  // États pour les emojis de niveau
-  const [emojiNiveau, setEmojiNiveau] = useState('⭐');
 
   // États pour les tags région
   const [tagsRegion, setTagsRegion] = useState<string[]>([
@@ -217,40 +211,22 @@ export function AdminCustomizationPage({ communaute }: AdminCustomizationPagePro
             </div>
           </Card>
 
-          {/* Emoji des niveaux de groupe */}
+          {/* Aperçu des niveaux de groupe */}
           <Card>
             <div className="p-6 space-y-6">
-              <h3>Emoji des niveaux de groupe</h3>
+              <h3>Niveaux de groupe</h3>
               <p className="text-sm text-[var(--color-text-secondary)]">
-                Choisissez l'emoji qui représentera les niveaux des groupes.
+                Aperçu du système de niveaux affiché sur les groupes.
               </p>
 
-              {/* Emojis suggérés */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium">Emojis suggérés</label>
-                <div className="flex flex-wrap gap-2">
-                  {SUGGESTED_EMOJIS.map((emoji) => (
-                    <button
-                      key={emoji}
-                      onClick={() => setEmojiNiveau(emoji)}
-                      className={`w-12 h-12 text-2xl rounded-lg border-2 transition-all ${
-                        emojiNiveau === emoji
-                          ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10'
-                          : 'border-[var(--color-border)] hover:border-[var(--color-primary)]/50'
-                      }`}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Prévisualisation des niveaux */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium">Aperçu des niveaux</label>
                 <div className="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg">
                   {[1, 2, 3, 4, 5].map((level) => (
-                    <Badge key={level} variant="level" level={level} emoji={emojiNiveau} />
+                    <div key={level} className="flex items-center gap-2">
+                      <span className="text-sm text-[var(--color-text-secondary)]">Niv. {level}</span>
+                      <Badge variant="level" level={level} />
+                    </div>
                   ))}
                 </div>
               </div>

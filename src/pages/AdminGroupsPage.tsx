@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
-import { Search, Users, Eye, TrendingUp } from 'lucide-react';
+import { Search, Users, Eye, TrendingUp, Star } from 'lucide-react';
 import { mockGroupes } from '../data/mockData';
 
 interface AdminGroupsPageProps {
@@ -60,7 +60,7 @@ export function AdminGroupsPage({ onNavigate }: AdminGroupsPageProps) {
         <Card>
           <div className="p-6 flex items-center gap-4">
             <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <Badge variant="level" level={Math.max(...mockGroupes.map(g => g.niveau))} />
+              <Star size={24} className="text-yellow-600 fill-yellow-400" />
             </div>
             <div>
               <p className="text-2xl font-bold">Niveau {Math.max(...mockGroupes.map(g => g.niveau))}</p>
