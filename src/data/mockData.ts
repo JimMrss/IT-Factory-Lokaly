@@ -186,6 +186,45 @@ export const mockUserProfile = {
   contactExterne: 'https://line.me/ti/p/marie-dubois'
 };
 
+export const mockHabitantsEnAttente = [
+  {
+    id: '1',
+    prenom: 'Camille',
+    nom: 'Fontaine',
+    email: 'camille.fontaine@email.com',
+    communaute: 'Commune de Tori',
+    date: '2025-01-15',
+    statut: 'en_attente'
+  },
+  {
+    id: '2',
+    prenom: 'Thomas',
+    nom: 'Garnier',
+    email: 'thomas.garnier@email.com',
+    communaute: 'Quartier des Fleurs',
+    date: '2025-01-18',
+    statut: 'en_attente'
+  },
+  {
+    id: '3',
+    prenom: 'Nadia',
+    nom: 'Belkacem',
+    email: 'nadia.belkacem@email.com',
+    communaute: 'Commune de Tori',
+    date: '2025-01-20',
+    statut: 'valide'
+  },
+  {
+    id: '4',
+    prenom: 'Hugo',
+    nom: 'Perrin',
+    email: 'hugo.perrin@email.com',
+    communaute: 'Village de Saint-Martin',
+    date: '2025-01-22',
+    statut: 'refuse'
+  }
+];
+
 export const mockStats = {
   annonces: 47,
   habitants: 156,

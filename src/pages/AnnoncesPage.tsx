@@ -5,6 +5,7 @@ import { AnnonceCard } from '../components/AnnonceCard';
 import { Button } from '../components/Button';
 import { Search, SlidersHorizontal, Plus } from 'lucide-react';
 import { mockAnnonces } from '../data/mockData';
+import { toast } from 'sonner';
 
 interface AnnoncesPageProps {
   onNavigate: (page: string, data?: any) => void;
@@ -115,7 +116,7 @@ export function AnnoncesPage({ onNavigate }: AnnoncesPageProps) {
                 key={annonce.id}
                 annonce={annonce}
                 onClick={() => onNavigate('annonce-detail', annonce)}
-                onInterested={() => alert('Intérêt manifesté ! Le contact sera partagé.')}
+                onInterested={() => toast.success('Intérêt manifesté ! Le contact sera partagé.')}
               />
             ))}
           </div>

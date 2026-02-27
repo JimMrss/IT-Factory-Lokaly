@@ -5,6 +5,7 @@ import { Input } from '../components/Input';
 import { Badge } from '../components/Badge';
 import { UserPlus, Search, Trash2, Eye, EyeOff, Key } from 'lucide-react';
 import { mockUtilisateurs } from '../data/mockData';
+import { toast } from 'sonner';
 
 export function AdminUsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,18 +19,18 @@ export function AdminUsersPage() {
   );
 
   const handleCreateUser = () => {
-    alert(`Utilisateur ${newUser.prenom} ${newUser.nom} (@${newUser.identifiant}) créé avec succès !\nMot de passe temporaire généré.`);
+    toast.success(`Utilisateur ${newUser.prenom} ${newUser.nom} créé. Mot de passe temporaire généré.`);
     setShowCreateModal(false);
     setNewUser({ prenom: '', nom: '', identifiant: '' });
   };
 
   const handleToggleStatus = (user: typeof mockUtilisateurs[0]) => {
     const newStatus = user.statut === 'actif' ? 'désactivé' : 'activé';
-    alert(`Utilisateur ${user.prenom} ${user.nom} ${newStatus}.`);
+    toast.success(`Utilisateur ${user.prenom} ${user.nom} ${newStatus}.`);
   };
 
   const handleResetPassword = (user: typeof mockUtilisateurs[0]) => {
-    alert(`Nouveau mot de passe généré pour ${user.prenom} ${user.nom}.`);
+    toast.success(`Nouveau mot de passe généré pour ${user.prenom} ${user.nom}.`);
   };
 
   return (

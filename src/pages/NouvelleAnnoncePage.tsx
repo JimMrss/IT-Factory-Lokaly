@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
 import { Select } from '../components/Select';
 import { Card } from '../components/Card';
-import { ArrowLeft, Sparkles, Eye, Send } from 'lucide-react';
+import { ArrowLeft, Sparkles, Eye, Send, Upload, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface NouvelleAnnoncePageProps {
   onNavigate: (page: string) => void;
@@ -18,6 +19,9 @@ export function NouvelleAnnoncePage({ onNavigate }: NouvelleAnnoncePageProps) {
   const [disponibilite, setDisponibilite] = useState('');
   const [aiKeywords, setAiKeywords] = useState('');
   const [aiSuggestion, setAiSuggestion] = useState('');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleAiGenerate = () => {
     // Simulation de génération IA
@@ -28,9 +32,18 @@ export function NouvelleAnnoncePage({ onNavigate }: NouvelleAnnoncePageProps) {
     }
   };
   
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Annonce publiée avec succès !');
+    toast.success('Annonce publiée avec succès !');
     onNavigate('annonces');
   };
   
@@ -119,16 +132,36 @@ export function NouvelleAnnoncePage({ onNavigate }: NouvelleAnnoncePageProps) {
               
               <div className="space-y-2">
                 <label className="block text-sm">
-                  Images (optionnel)
+                  Image (optionnel)
                 </label>
-                <div className="border-2 border-dashed border-[var(--color-border)] rounded-lg p-8 text-center hover:border-[var(--color-primary)] transition-colors cursor-pointer">
-                  <p className="text-[var(--color-text-secondary)]">
-                    Cliquez pour ajouter des images
-                  </p>
-                  <p className="text-sm text-[var(--color-text-light)] mt-1">
-                    JPG, PNG - Max 5 Mo
-                  </p>
-                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+                {imagePreview ? (
+                  <div className="relative rounded-lg overflow-hidden border-2 border-[var(--color-border)]">
+                    <img src={imagePreview} alt="Aperçu" className="w-full h-48 object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => { setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                      className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-1 transition-colors"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-[var(--color-border)] rounded-lg p-8 text-center hover:border-[var(--color-primary)] transition-colors cursor-pointer"
+                  >
+                    <Upload size={24} className="mx-auto text-[var(--color-text-light)] mb-2" />
+                    <p className="text-[var(--color-text-secondary)]">Cliquez pour ajouter une image</p>
+                    <p className="text-sm text-[var(--color-text-light)] mt-1">JPG, PNG - Max 5 Mo</p>
+                  </div>
+                )}
               </div>
             </div>
           </Card>
@@ -183,6 +216,7 @@ export function NouvelleAnnoncePage({ onNavigate }: NouvelleAnnoncePageProps) {
               variant="outline"
               icon={<Eye size={20} />}
               fullWidth
+              onClick={() => setShowPreview(true)}
             >
               Prévisualiser
             </Button>
@@ -196,6 +230,55 @@ export function NouvelleAnnoncePage({ onNavigate }: NouvelleAnnoncePageProps) {
             </Button>
           </div>
         </form>
+
+        {/* Modal prévisualisation */}
+        {showPreview && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
+              <div className="flex items-center justify-between p-6 border-b border-[var(--color-border)]">
+                <h3 className="text-lg font-bold">Aperçu de l'annonce</h3>
+                <button onClick={() => setShowPreview(false)} className="p-1 hover:bg-gray-100 rounded-full">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                {imagePreview && (
+                  <img src={imagePreview} alt="Aperçu" className="w-full h-48 object-cover rounded-xl" />
+                )}
+                <div className="flex items-center gap-2">
+                  {categorie && (
+                    <span className="px-3 py-1 text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full">
+                      {categorie}
+                    </span>
+                  )}
+                  {zone && (
+                    <span className="px-3 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+                      {zone}
+                    </span>
+                  )}
+                </div>
+                <h2 className="text-xl font-bold">{titre || 'Titre de l\'annonce'}</h2>
+                <p className="text-[var(--color-text-secondary)]">{description || 'Description de l\'annonce...'}</p>
+                {disponibilite && (
+                  <p className="text-sm text-[var(--color-text-secondary)]">
+                    <span className="font-medium">Disponibilité :</span> {disponibilite}
+                  </p>
+                )}
+                <div className="pt-4 border-t border-[var(--color-border)] flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">M</span>
+                  </div>
+                  <span className="text-sm text-[var(--color-text-secondary)]">Marie Dubois</span>
+                </div>
+              </div>
+              <div className="p-6 pt-0">
+                <Button variant="outline" fullWidth onClick={() => setShowPreview(false)}>
+                  Fermer l'aperçu
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Toaster } from 'sonner';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { AdminSidebar } from './components/AdminSidebar';
@@ -17,6 +18,7 @@ import { AdminCustomizationPage } from './pages/AdminCustomizationPage';
 import { AdminStatsPage } from './pages/AdminStatsPage';
 import { AdminGroupsPage } from './pages/AdminGroupsPage';
 import { AdminGroupDetailPage } from './pages/AdminGroupDetailPage';
+import { AdminValidationPage } from './pages/AdminValidationPage';
 
 type PageType =
   | 'home'
@@ -32,7 +34,8 @@ type PageType =
   | 'admin-customization'
   | 'admin-groups'
   | 'admin-group-detail'
-  | 'admin-stats';
+  | 'admin-stats'
+  | 'admin-validation';
 
 interface User {
   username: string;
@@ -98,6 +101,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
+      <Toaster position="top-right" richColors />
       {!isAdminPage ? (
         <div className="flex flex-col min-h-screen">
           <Header
@@ -129,6 +133,7 @@ export default function App() {
               {currentPage === 'admin-groups' && <AdminGroupsPage onNavigate={handleNavigate} />}
               {currentPage === 'admin-group-detail' && <AdminGroupDetailPage groupe={pageData} onNavigate={handleNavigate} />}
               {currentPage === 'admin-stats' && <AdminStatsPage />}
+              {currentPage === 'admin-validation' && <AdminValidationPage />}
             </div>
           </main>
         </div>

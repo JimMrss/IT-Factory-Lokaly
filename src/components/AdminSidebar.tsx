@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, UserPlus, BarChart3, Palette, Menu, X, UsersRound } from 'lucide-react';
+import { LayoutDashboard, UserPlus, BarChart3, Palette, Menu, X, UsersRound, ClipboardCheck } from 'lucide-react';
 
 interface AdminSidebarProps {
   currentPage: string;
@@ -14,6 +14,7 @@ export function AdminSidebar({ currentPage, onNavigate }: AdminSidebarProps) {
     { id: 'admin-users', label: 'Utilisateurs', icon: UserPlus },
     { id: 'admin-groups', label: 'Groupes', icon: UsersRound },
     { id: 'admin-stats', label: 'Statistiques', icon: BarChart3 },
+    { id: 'admin-validation', label: 'Validation', icon: ClipboardCheck },
     { id: 'admin-customization', label: 'Personnalisation', icon: Palette },
   ];
 

@@ -4,6 +4,7 @@ import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
 import { Card } from '../components/Card';
 import { ArrowLeft, Users, Send } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface CreerGroupePageProps {
   onNavigate: (page: string) => void;
@@ -16,7 +17,7 @@ export function CreerGroupePage({ onNavigate }: CreerGroupePageProps) {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Groupe créé avec succès ! Il commencera au Niveau 1.');
+    toast.success('Groupe créé avec succès ! Il commencera au Niveau 1.');
     onNavigate('groupes');
   };
   

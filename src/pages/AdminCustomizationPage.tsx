@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card } from '../components/Card';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { Save, Eye, Upload, Plus, X, MapPin } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface AdminCustomizationPageProps {
   communaute?: any;
@@ -38,9 +39,21 @@ export function AdminCustomizationPage({ communaute }: AdminCustomizationPagePro
     'Salle Polyvalente',
   ]);
   const [nouveauTagRegion, setNouveauTagRegion] = useState('');
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setLogoUrl(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSave = () => {
-    alert('Personnalisation enregistrée avec succès !');
+    document.documentElement.style.setProperty('--color-primary', couleurPrimaire);
+    document.documentElement.style.setProperty('--color-secondary', couleurSecondaire);
+    toast.success('Personnalisation enregistrée et appliquée !');
   };
 
   const applyColorPreset = (preset: typeof COLOR_PRESETS[0]) => {
@@ -97,7 +110,17 @@ export function AdminCustomizationPage({ communaute }: AdminCustomizationPagePro
                       )}
                     </div>
                     <div className="flex-1">
-                      <div className="border-2 border-dashed border-[var(--color-border)] rounded-lg p-4 text-center hover:border-[var(--color-primary)] transition-colors cursor-pointer">
+                      <input
+                        ref={logoInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png"
+                        className="hidden"
+                        onChange={handleLogoChange}
+                      />
+                      <div
+                        onClick={() => logoInputRef.current?.click()}
+                        className="border-2 border-dashed border-[var(--color-border)] rounded-lg p-4 text-center hover:border-[var(--color-primary)] transition-colors cursor-pointer"
+                      >
                         <Upload size={20} className="mx-auto text-[var(--color-text-light)] mb-1" />
                         <p className="text-sm text-[var(--color-text-secondary)]">
                           Importer un logo
@@ -311,6 +334,11 @@ export function AdminCustomizationPage({ communaute }: AdminCustomizationPagePro
               variant="outline"
               icon={<Eye size={20} />}
               fullWidth
+              onClick={() => {
+                document.documentElement.style.setProperty('--color-primary', couleurPrimaire);
+                document.documentElement.style.setProperty('--color-secondary', couleurSecondaire);
+                toast.success('Aperçu appliqué sur le site !');
+              }}
             >
               Prévisualiser
             </Button>

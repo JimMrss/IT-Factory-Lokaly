@@ -5,6 +5,7 @@ import { Card } from '../components/Card';
 import { AnnonceCard } from '../components/AnnonceCard';
 import { ArrowLeft, Users, UserPlus, TrendingUp } from 'lucide-react';
 import { mockAnnonces } from '../data/mockData';
+import { toast } from 'sonner';
 
 interface GroupeDetailPageProps {
   groupe: any;
@@ -69,7 +70,7 @@ export function GroupeDetailPage({ groupe, onNavigate }: GroupeDetailPageProps) 
                   key={annonce.id}
                   annonce={annonce}
                   onClick={() => onNavigate('annonce-detail', annonce)}
-                  onInterested={() => alert('Intérêt manifesté !')}
+                  onInterested={() => toast.success('Intérêt manifesté ! Le contact sera partagé.')}
                 />
               ))}
             </div>

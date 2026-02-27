@@ -4,8 +4,9 @@ import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
-import { User, Save, Edit2 } from 'lucide-react';
+import { User, Save, Edit2, Plus, X } from 'lucide-react';
 import { mockUserProfile } from '../data/mockData';
+import { toast } from 'sonner';
 
 interface ProfilPageProps {
   onNavigate: (page: string) => void;
@@ -15,9 +16,23 @@ export function ProfilPage({ onNavigate }: ProfilPageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [bio, setBio] = useState(mockUserProfile.bio);
   const [contactExterne, setContactExterne] = useState(mockUserProfile.contactExterne);
+  const [objetsDisponibles, setObjetsDisponibles] = useState(mockUserProfile.objetsDisponibles);
+  const [nouvelObjet, setNouvelObjet] = useState('');
+
+  const handleAddObjet = () => {
+    const trimmed = nouvelObjet.trim();
+    if (trimmed && !objetsDisponibles.includes(trimmed)) {
+      setObjetsDisponibles([...objetsDisponibles, trimmed]);
+      setNouvelObjet('');
+    }
+  };
+
+  const handleRemoveObjet = (objet: string) => {
+    setObjetsDisponibles(objetsDisponibles.filter(o => o !== objet));
+  };
   
   const handleSave = () => {
-    alert('Profil enregistré avec succès !');
+    toast.success('Profil enregistré avec succès !');
     setIsEditing(false);
   };
   
@@ -112,17 +127,37 @@ export function ProfilPage({ onNavigate }: ProfilPageProps) {
           <div className="p-6 md:p-8 space-y-4">
             <h3>Objets disponibles</h3>
             <ul className="space-y-2">
-              {mockUserProfile.objetsDisponibles.map((objet, index) => (
-                <li key={index} className="flex items-center gap-2 text-[var(--color-text-secondary)]">
-                  <span className="w-2 h-2 bg-[var(--color-primary)] rounded-full"></span>
-                  {objet}
+              {objetsDisponibles.map((objet, index) => (
+                <li key={index} className="flex items-center justify-between gap-2 text-[var(--color-text-secondary)]">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-[var(--color-primary)] rounded-full flex-shrink-0"></span>
+                    {objet}
+                  </div>
+                  {isEditing && (
+                    <button
+                      onClick={() => handleRemoveObjet(objet)}
+                      className="p-0.5 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-red-500"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
             {isEditing && (
-              <Button variant="outline" size="sm">
-                + Ajouter un objet
-              </Button>
+              <div className="flex gap-2 pt-2">
+                <input
+                  type="text"
+                  value={nouvelObjet}
+                  onChange={(e) => setNouvelObjet(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddObjet())}
+                  placeholder="Ex: Vélo, Échelle..."
+                  className="flex-1 px-3 py-2 text-sm rounded-lg border-2 border-[var(--color-border)] focus:border-[var(--color-primary)] outline-none transition-all"
+                />
+                <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={handleAddObjet}>
+                  Ajouter
+                </Button>
+              </div>
             )}
           </div>
         </Card>

@@ -4,6 +4,7 @@ import { Button } from '../components/Button';
 import { Select } from '../components/Select';
 import { Check, X } from 'lucide-react';
 import { mockHabitantsEnAttente } from '../data/mockData';
+import { toast } from 'sonner';
 
 export function AdminValidationPage() {
   const [habitants, setHabitants] = useState(mockHabitantsEnAttente);
@@ -13,14 +14,14 @@ export function AdminValidationPage() {
     setHabitants(habitants.map(h => 
       h.id === id ? { ...h, statut: 'valide' } : h
     ));
-    alert('Habitant validé avec succès !');
+    toast.success('Habitant validé avec succès !');
   };
   
   const handleReject = (id: string) => {
     setHabitants(habitants.map(h => 
       h.id === id ? { ...h, statut: 'refuse' } : h
     ));
-    alert('Demande refusée.');
+    toast.error('Demande refusée.');
   };
   
   const filteredHabitants = habitants.filter(h => 
