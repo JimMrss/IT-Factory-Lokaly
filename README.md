@@ -1,4 +1,3 @@
-
 # Lokaly
 
 Run `npm i` to install the dependencies.
@@ -9,12 +8,12 @@ Run `npm run dev` to start the development server.
 
 ## Ce que le frontend attend du backend
 
-> Comparaison entre les specs envoyées (BACKEND_SPECS.md) et la doc reçue (DOC BackEnd Lokaly.pdf).
-> Pour chaque point : **ce qui existe**, **ce qui manque**, et des **exemples concrets** de requêtes/réponses attendues.
+> Ce document compare ce que vous avez livré (DOC BackEnd Lokaly.pdf) avec ce dont le frontend a besoin pour fonctionner.
+> Pour chaque point, vous trouverez : **ce qui existe**, **ce qui manque**, et des **exemples concrets** de requêtes/réponses attendues.
 
 ---
 
-### Table des matières
+## Table des matières
 
 1. [Ce qui existe et fonctionne](#1-ce-qui-existe-et-fonctionne)
 2. [Endpoints manquants](#2-endpoints-manquants)
@@ -25,7 +24,7 @@ Run `npm run dev` to start the development server.
 
 ---
 
-### 1. Ce qui existe et fonctionne
+## 1. Ce qui existe et fonctionne
 
 Voici ce que vous avez livré et qui correspond à nos besoins :
 
@@ -50,13 +49,13 @@ Voici ce que vous avez livré et qui correspond à nos besoins :
 
 ---
 
-### 2. Endpoints manquants
+## 2. Endpoints manquants
 
-#### 2.1 Authentification
+### 2.1 Authentification
 
 **Aucun endpoint d'auth n'existe.** Le frontend a une page de connexion et d'inscription qui sont actuellement simulées.
 
-##### `POST /api/auth/login` — Connexion
+#### `POST /api/auth/login` — Connexion
 
 Le frontend envoie :
 ```json
@@ -83,7 +82,7 @@ Le frontend attend en retour :
 
 > **Pourquoi on a besoin du `role` :** le frontend affiche un bouton "Admin" uniquement pour les admins. Sans ça, n'importe qui peut accéder au panel admin.
 
-##### `POST /api/auth/register` — Inscription
+#### `POST /api/auth/register` — Inscription
 
 Le frontend envoie :
 ```json
@@ -108,11 +107,11 @@ Le frontend attend en retour :
 
 ---
 
-#### 2.2 Lister les ressources (getAll)
+### 2.2 Lister les ressources (getAll)
 
 **C'est le manque le plus bloquant.** Vos bridges permettent de récupérer UNE ressource par ID, mais le frontend a besoin de récupérer TOUTES les ressources pour afficher des listes.
 
-##### `GET /api/annonces` — Liste de toutes les annonces
+#### `GET /api/annonces` — Liste de toutes les annonces
 
 **Pages qui utilisent ce endpoint :** HomePage (les 4 dernières), AnnoncesPage (toutes avec filtres), GroupeDetailPage (annonces d'un groupe)
 
@@ -147,13 +146,18 @@ Le frontend attend en retour :
     },
     "state": "active",
     "interested_users": [1, 2]
+  },
+  {
+    "id": 2,
+    "name": "Cours de couture gratuits",
+    "..."
   }
 ]
 ```
 
-> **Point important sur `auteur` :** Le frontend affiche le nom et l'avatar de l'auteur directement sur chaque carte d'annonce. Si vous ne retournez que `provider: 4` (un ID), le frontend devra faire 1 appel `getUser()` par annonce pour récupérer le nom. Merci d'inclure un objet `auteur` dans la réponse, ou au minimum les champs `provider_name` et `provider_avatar`.
+> **Point important sur `auteur` :** Le frontend affiche le nom et l'avatar de l'auteur directement sur chaque carte d'annonce. Si vous ne retournez que `provider: 4` (un ID), le frontend devra faire 1 appel `getUser()` par annonce pour récupérer le nom. C'est très inefficace. Merci d'inclure un objet `auteur` dans la réponse, ou au minimum les champs `provider_name` et `provider_avatar`.
 
-##### `GET /api/groupes` — Liste de tous les groupes
+#### `GET /api/groupes` — Liste de tous les groupes
 
 **Pages qui utilisent ce endpoint :** HomePage (les 3 premiers), GroupesPage (tous), AdminGroupsPage (tous avec stats)
 
@@ -172,15 +176,20 @@ Le frontend attend en retour :
     "description": "Échange de graines, conseils...",
     "categorie": "Jardinage",
     "niveau": 3,
-    "members": [1, 2, 4, 7, 8],
+    "members": [1, 2, 4, 7, 8, 12, 15, 18, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39],
     "annonces": [1, 4]
+  },
+  {
+    "id": 2,
+    "name": "Couture & DIY",
+    "..."
   }
 ]
 ```
 
-> **A noter :** Le frontend calcule le nombre de membres avec `members.length`. Si vous préférez envoyer un `membresCount: 28` à la place du tableau complet dans la liste, c'est OK aussi.
+> **A noter :** Le frontend calcule le nombre de membres avec `members.length`. Si vous préférez envoyer un `membresCount: 28` à la place du tableau complet dans la liste, c'est OK aussi (le tableau complet serait uniquement dans `getGroup(id)`).
 
-##### `GET /api/users` — Liste de tous les utilisateurs (admin)
+#### `GET /api/users` — Liste de tous les utilisateurs (admin)
 
 **Page qui utilise ce endpoint :** AdminUsersPage
 
@@ -204,17 +213,23 @@ Le frontend attend en retour :
     "dateCreation": "2024-12-08",
     "statut": "actif",
     "role": "habitant"
+  },
+  {
+    "id": 2,
+    "name": "Marc",
+    "surname": "Durand",
+    "..."
   }
 ]
 ```
 
 ---
 
-#### 2.3 Statistiques
+### 2.3 Statistiques
 
 **Pages qui utilisent ce endpoint :** HomePage, AdminDashboardPage, AdminStatsPage
 
-##### `GET /api/stats` — Stats globales
+#### `GET /api/stats` — Stats globales
 
 Le frontend attend :
 ```json
@@ -226,16 +241,20 @@ Le frontend attend :
 }
 ```
 
-> `participation` = pourcentage d'utilisateurs actifs (qui ont posté ou rejoint un groupe dans les 30 derniers jours).
+> `participation` = pourcentage d'utilisateurs actifs (qui ont posté ou rejoint un groupe dans les 30 derniers jours par exemple).
 
-##### `GET /api/stats/activite` — Historique mensuel
+#### `GET /api/stats/activite` — Historique mensuel
 
 Le frontend attend :
 ```json
 [
   { "mois": "Juin", "annonces": 12, "participation": 45 },
   { "mois": "Juillet", "annonces": 18, "participation": 52 },
-  { "mois": "Août", "annonces": 15, "participation": 48 }
+  { "mois": "Août", "annonces": 15, "participation": 48 },
+  { "mois": "Sept", "annonces": 22, "participation": 61 },
+  { "mois": "Oct", "annonces": 28, "participation": 65 },
+  { "mois": "Nov", "annonces": 35, "participation": 72 },
+  { "mois": "Déc", "annonces": 47, "participation": 68 }
 ]
 ```
 
@@ -243,11 +262,13 @@ Le frontend attend :
 
 ---
 
-#### 2.4 Profil utilisateur
+### 2.4 Profil utilisateur
 
 **Page qui utilise ce endpoint :** ProfilPage
 
-##### `GET /api/profil` — Récupérer son profil (utilisateur connecté)
+Le profil est différent du User : c'est les infos que l'utilisateur remplit lui-même (bio, compétences, etc.).
+
+#### `GET /api/profil` — Récupérer son profil (utilisateur connecté)
 
 Le frontend attend :
 ```json
@@ -262,7 +283,7 @@ Le frontend attend :
 }
 ```
 
-##### `PUT /api/profil` — Modifier son profil
+#### `PUT /api/profil` — Modifier son profil
 
 Le frontend envoie (seuls les champs modifiés) :
 ```json
@@ -272,18 +293,21 @@ Le frontend envoie (seuls les champs modifiés) :
 }
 ```
 
-> **Lien avec UserPayload :** Vous pourriez intégrer ces champs directement dans `updateUser()` en ajoutant `bio`, `centresInteret`, `competences`, `objetsDisponibles`, `contactExterne` aux `authorizedFields`.
+Le frontend attend la même réponse que le GET avec les données mises à jour.
+
+> **Lien avec UserPayload :** Vous pourriez intégrer ces champs directement dans `updateUser()` en ajoutant `bio`, `centresInteret`, `competences`, `objetsDisponibles`, `contactExterne` aux `authorizedFields`. Comme vous préférez.
 
 ---
 
-#### 2.5 Validation des habitants (admin)
+### 2.5 Validation des habitants (admin)
 
 **Page qui utilise ce endpoint :** AdminValidationPage
 
 Quand un habitant s'inscrit via `/api/auth/register`, il arrive ici en attente de validation.
 
-##### `GET /api/validation` — Liste des inscriptions
+#### `GET /api/validation` — Liste des inscriptions
 
+Le frontend appelle :
 ```
 GET /api/validation
 GET /api/validation?statut=en_attente
@@ -300,30 +324,43 @@ Le frontend attend :
     "communaute": "Commune de Tori",
     "date": "2025-01-15",
     "statut": "en_attente"
+  },
+  {
+    "id": 2,
+    "name": "Thomas",
+    "surname": "Garnier",
+    "email": "thomas.garnier@email.com",
+    "communaute": "Quartier des Fleurs",
+    "date": "2025-01-18",
+    "statut": "en_attente"
   }
 ]
 ```
 
-##### `PUT /api/validation/:id` — Valider ou refuser
+#### `PUT /api/validation/:id` — Valider ou refuser
 
 Le frontend envoie :
 ```json
-{ "statut": "valide" }
+{
+  "statut": "valide"
+}
 ```
 ou
 ```json
-{ "statut": "refuse" }
+{
+  "statut": "refuse"
+}
 ```
 
-> Quand `statut` passe à `"valide"`, l'habitant doit pouvoir se connecter.
+> Quand `statut` passe à `"valide"`, l'habitant doit pouvoir se connecter. Quand `"refuse"`, la demande est archivée.
 
 ---
 
-#### 2.6 Communauté / Personnalisation (admin)
+### 2.6 Communauté / Personnalisation (admin)
 
 **Page qui utilise ce endpoint :** AdminCustomizationPage
 
-##### `GET /api/communaute`
+#### `GET /api/communaute` — Infos de la communauté
 
 Le frontend attend :
 ```json
@@ -343,7 +380,7 @@ Le frontend attend :
 }
 ```
 
-##### `PUT /api/communaute/customization`
+#### `PUT /api/communaute/customization` — Modifier la personnalisation
 
 Le frontend envoie :
 ```json
@@ -359,9 +396,9 @@ Le frontend envoie :
 
 ---
 
-### 3. Champs manquants sur vos modèles
+## 3. Champs manquants sur vos modèles
 
-#### 3.1 UserPayload
+### 3.1 UserPayload
 
 Votre modèle actuel :
 ```typescript
@@ -386,9 +423,27 @@ interface UserPayload {
 | `dateCreation` | `string` (ISO) | Oui | Affiché dans la liste admin des utilisateurs |
 | `avatar` | `string` (URL) | Non | Photo de profil, affiché à côté du nom |
 
+**Modèle complet attendu par le frontend :**
+```typescript
+interface UserPayload {
+  identifier?: string;
+  name?: string;
+  surname?: string;
+  description?: string;
+  email?: string;
+  communaute?: string;
+  statut?: "actif" | "desactive";
+  role?: "habitant" | "admin";
+  dateCreation?: string;
+  avatar?: string;
+  groups?: string[];
+  activities?: string[];
+}
+```
+
 ---
 
-#### 3.2 GroupPayload
+### 3.2 GroupPayload
 
 Votre modèle actuel :
 ```typescript
@@ -417,20 +472,35 @@ interface GroupPayload {
 50+ membres   → niveau 5
 ```
 
+> Le backend peut calculer ça automatiquement à partir de `members.length`. Le frontend ne fait que l'afficher.
+
+**Modèle complet attendu par le frontend :**
+```typescript
+interface GroupPayload {
+  name?: string;
+  description?: string;
+  categorie?: "Jardinage" | "Culture" | "Sport" | "Bricolage";
+  niveau?: number;
+  image?: string;
+  members?: number[];
+  annonces?: number[];
+}
+```
+
 ---
 
-#### 3.3 AnnoncePayload
+### 3.3 AnnoncePayload
 
 Votre modèle actuel :
 ```typescript
 interface AnnoncePayload {
-  name?: string;              // OK
-  interested_users?: number[];// OK
+  name?: string;              // OK (on utilise "titre" côté front, voir section 4)
+  interested_users?: number[];// OK (pas encore utilisé côté front)
   date?: string;              // OK
   hour?: string;              // OK
   description?: string;       // OK
   location?: string;          // OK
-  provider?: number;          // Problème : on a besoin du nom, pas juste l'ID
+  provider?: number;          // Problème : on a besoin du nom, pas juste l'ID (voir ci-dessous)
   state?: string;             // OK
 }
 ```
@@ -446,9 +516,21 @@ interface AnnoncePayload {
 
 **Problème avec `provider` :**
 
-Le frontend affiche le **nom et l'avatar** de l'auteur sur chaque carte d'annonce. Avec juste `provider: 4`, il faudrait faire un appel `getUser(4)` par annonce (50 annonces = 50 appels).
+Actuellement, `provider` retourne juste un `number` (l'ID de l'auteur). Mais le frontend affiche ceci sur chaque carte d'annonce :
 
-**Solution :** Inclure les infos de l'auteur dans la réponse :
+```
+┌─────────────────────────────┐
+│  [photo]                    │
+│  Prêt de tondeuse à gazon   │
+│  Centre-ville · Week-ends    │
+│                              │
+│  👤 Marie Dubois             │  ← On a besoin du NOM ici
+└─────────────────────────────┘
+```
+
+Avec juste `provider: 4`, il faudrait faire un appel `getUser(4)` pour CHAQUE annonce de la liste. Pour 50 annonces = 50 appels supplémentaires.
+
+**Solution proposée :** Inclure les infos de l'auteur dans la réponse :
 ```json
 {
   "provider": 4,
@@ -460,44 +542,109 @@ Le frontend affiche le **nom et l'avatar** de l'auteur sur chaque carte d'annonc
 }
 ```
 
----
+Ou alternativement, ajouter `provider_name` et `provider_avatar` directement.
 
-### 4. Mapping des noms backend ↔ frontend
-
-Le frontend s'est adapté aux noms du backend. Voici la correspondance :
-
-| Backend | Frontend | OK ? |
-|---------|----------|------|
-| `name` (annonce) | `name` | OK |
-| `location` | `location` | OK |
-| `provider` (number) | `auteur` (objet) | A enrichir |
-| `name` (user) | `name` (prénom) | OK |
-| `surname` | `surname` (nom) | OK |
-| `identifier` | `identifier` | OK |
-| `name` (groupe) | `name` | OK |
-| `members` (number[]) | `members` | OK |
-
----
-
-### 5. Questions à trancher ensemble
-
-**Q1 : Format des IDs** — Les IDs seront-ils toujours des `number` ? On s'adaptera côté front.
-
-**Q2 : URL de base de l'API** — Quelle URL ? (`http://localhost:????/api` en local, quelle URL en prod ?)
-
-**Q3 : Authentification des requêtes** — Header `Authorization: Bearer <token_jwt>`, Cookie de session, ou autre ?
-
-**Q4 : `removeMemberFromGroup()`** — POST ou DELETE ?
-
-**Q5 : Pagination** — Pour les getAll, tout d'un coup ou paginé ?
-
-**Q6 : Gestion des erreurs** — Quel format pour les erreurs ?
+**Modèle complet attendu par le frontend :**
+```typescript
+interface AnnoncePayload {
+  name?: string;
+  description?: string;
+  type?: "Don" | "Prêt" | "Service" | "Atelier";
+  zone?: string;
+  disponibilite?: string;
+  image?: string;
+  date?: string;
+  hour?: string;
+  location?: string;
+  provider?: number;
+  auteur?: { id: number; nom: string; avatar?: string };
+  state?: string;
+  interested_users?: number[];
+}
+```
 
 ---
 
-### 6. Résumé des priorités
+## 4. Mapping des noms backend ↔ frontend
 
-#### Priorité 1 — BLOQUANT (le site ne fonctionne pas sans)
+Le backend et le frontend utilisent des noms différents pour les mêmes choses. Il faut qu'on se mette d'accord sur les noms finaux. Voici la correspondance actuelle :
+
+### Annonces
+| Backend (votre nom) | Frontend (notre nom) | Même chose ? |
+|---------------------|---------------------|--------------|
+| `name` | `titre` | Oui — on peut s'adapter à `name` |
+| `location` | `zone` | Probablement oui — à confirmer |
+| `provider` (number) | `auteur` (objet) | Non — on a besoin du nom, pas juste l'ID |
+| `state` | — | Pas utilisé côté front pour l'instant |
+| `interested_users` | — | Pas utilisé côté front pour l'instant |
+
+### Utilisateurs
+| Backend (votre nom) | Frontend (notre nom) | Même chose ? |
+|---------------------|---------------------|--------------|
+| `name` | `prenom` | Oui |
+| `surname` | `nom` | Oui |
+| `identifier` | `identifiant` | Oui |
+
+### Groupes
+| Backend (votre nom) | Frontend (notre nom) | Même chose ? |
+|---------------------|---------------------|--------------|
+| `name` | `nom` | Oui |
+| `members` (number[]) | `membres` (nombre ou liste) | Le front affiche le **count**, vous envoyez le **tableau** → OK |
+
+> **Proposition :** Le frontend s'adaptera aux noms du backend. Pas besoin de renommer vos champs existants. Par contre il faut bien **ajouter** les champs manquants listés en section 3.
+
+---
+
+## 5. Questions à trancher ensemble
+
+### Q1 : Format des IDs
+Le frontend utilise des `string` partout (`id: "1"`), votre backend utilise `number` ou `int | string`.
+**On a besoin de savoir :** Les IDs seront-ils toujours des `number` ? On s'adaptera côté front.
+
+### Q2 : URL de base de l'API
+Quelle URL utiliser pour appeler vos bridges ?
+- En local : `http://localhost:????/api` — quel port ?
+- En prod : quelle URL ?
+
+### Q3 : Authentification des requêtes
+Comment le frontend doit-il prouver qu'il est connecté à chaque requête ?
+- **Option A :** Header `Authorization: Bearer <token_jwt>` (recommandé)
+- **Option B :** Cookie de session
+- **Option C :** Autre ?
+
+### Q4 : `removeMemberFromGroup()` — POST ou DELETE ?
+Votre doc dit "POST (à voir si on ne fait pas plus un DELETE)". On s'adaptera, mais il faut qu'on sache.
+
+### Q5 : Pagination
+Quand on fait `GET /api/annonces` et qu'il y a 500 annonces, est-ce qu'on reçoit tout d'un coup ou est-ce paginé ?
+Si paginé, quel format ?
+```
+GET /api/annonces?page=1&limit=20
+
+Réponse:
+{
+  "data": [...],
+  "total": 500,
+  "page": 1,
+  "totalPages": 25
+}
+```
+
+### Q6 : Gestion des erreurs
+Quel format pour les erreurs ? On propose :
+```json
+{
+  "error": true,
+  "message": "Utilisateur non trouvé",
+  "code": 404
+}
+```
+
+---
+
+## 6. Résumé des priorités
+
+### Priorité 1 — BLOQUANT (le site ne fonctionne pas sans)
 
 | Quoi | Détail |
 |------|--------|
@@ -510,7 +657,7 @@ Le frontend s'est adapté aux noms du backend. Voici la correspondance :
 | Objet `auteur` dans les annonces | Section 3.3 |
 | Répondre aux questions Q1-Q3 | Section 5 |
 
-#### Priorité 2 — IMPORTANT (pages admin incomplètes)
+### Priorité 2 — IMPORTANT (pages admin incomplètes)
 
 | Quoi | Détail |
 |------|--------|
@@ -520,7 +667,7 @@ Le frontend s'est adapté aux noms du backend. Voici la correspondance :
 | Champs User : email, communaute, statut, role, dateCreation | Section 3.1 |
 | Profil utilisateur (GET + PUT) | Section 2.4 |
 
-#### Priorité 3 — SECONDAIRE (améliorations)
+### Priorité 3 — SECONDAIRE (améliorations)
 
 | Quoi | Détail |
 |------|--------|
