@@ -12,8 +12,8 @@ interface NouvelleAnnoncePageProps {
 }
 
 export function NouvelleAnnoncePage({ onNavigate }: NouvelleAnnoncePageProps) {
-  const [titre, setTitre] = useState('');
-  const [categorie, setCategorie] = useState('');
+  const [name, setName] = useState('');
+  const [type, setType] = useState('');
   const [description, setDescription] = useState('');
   const [zone, setZone] = useState('');
   const [disponibilite, setDisponibilite] = useState('');
@@ -76,23 +76,23 @@ export function NouvelleAnnoncePage({ onNavigate }: NouvelleAnnoncePageProps) {
               <Input
                 label="Titre de l'annonce"
                 placeholder="Ex: Prêt de tondeuse à gazon"
-                value={titre}
-                onChange={(e) => setTitre(e.target.value)}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
                 helper="Soyez clair et précis"
               />
-              
+
               <Select
-                label="Catégorie"
-                placeholder="Sélectionnez une catégorie"
-                value={categorie}
-                onChange={(e) => setCategorie(e.target.value)}
+                label="Type d'annonce"
+                placeholder="Sélectionnez un type"
+                value={type}
+                onChange={(e) => setType(e.target.value)}
                 required
                 options={[
-                  { value: 'objet', label: 'Objet (don/prêt)' },
-                  { value: 'service', label: 'Service' },
-                  { value: 'atelier', label: 'Atelier' },
-                  { value: 'autre', label: 'Autre' }
+                  { value: 'Don', label: 'Don' },
+                  { value: 'Prêt', label: 'Prêt' },
+                  { value: 'Service', label: 'Service' },
+                  { value: 'Atelier', label: 'Atelier' }
                 ]}
               />
               
@@ -114,10 +114,10 @@ export function NouvelleAnnoncePage({ onNavigate }: NouvelleAnnoncePageProps) {
                   onChange={(e) => setZone(e.target.value)}
                   required
                   options={[
-                    { value: 'centre', label: 'Centre-ville' },
-                    { value: 'nord', label: 'Quartier Nord' },
-                    { value: 'sud', label: 'Quartier Sud' },
-                    { value: 'toute', label: 'Toute la commune' }
+                    { value: 'Centre-ville', label: 'Centre-ville' },
+                    { value: 'Quartier Nord', label: 'Quartier Nord' },
+                    { value: 'Quartier Sud', label: 'Quartier Sud' },
+                    { value: 'Toute la commune', label: 'Toute la commune' }
                   ]}
                 />
                 
@@ -246,9 +246,9 @@ export function NouvelleAnnoncePage({ onNavigate }: NouvelleAnnoncePageProps) {
                   <img src={imagePreview} alt="Aperçu" className="w-full h-48 object-cover rounded-xl" />
                 )}
                 <div className="flex items-center gap-2">
-                  {categorie && (
+                  {type && (
                     <span className="px-3 py-1 text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full">
-                      {categorie}
+                      {type}
                     </span>
                   )}
                   {zone && (
@@ -257,7 +257,7 @@ export function NouvelleAnnoncePage({ onNavigate }: NouvelleAnnoncePageProps) {
                     </span>
                   )}
                 </div>
-                <h2 className="text-xl font-bold">{titre || 'Titre de l\'annonce'}</h2>
+                <h2 className="text-xl font-bold">{name || 'Titre de l\'annonce'}</h2>
                 <p className="text-[var(--color-text-secondary)]">{description || 'Description de l\'annonce...'}</p>
                 {disponibilite && (
                   <p className="text-sm text-[var(--color-text-secondary)]">

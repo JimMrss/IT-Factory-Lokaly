@@ -35,7 +35,7 @@ export function GroupeDetailPage({ groupe, onNavigate }: GroupeDetailPageProps) 
             <div className="flex flex-col md:flex-row items-start justify-between gap-4">
               <div className="flex-1 space-y-3">
                 <div className="flex items-center gap-3 flex-wrap">
-                  <h1>{groupe.nom}</h1>
+                  <h1>{groupe.name}</h1>
                   <Badge variant="level" level={groupe.niveau}>
                     Niveau {groupe.niveau}
                   </Badge>
@@ -45,7 +45,7 @@ export function GroupeDetailPage({ groupe, onNavigate }: GroupeDetailPageProps) 
                 </p>
                 <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
                   <Users size={20} />
-                  <span>{groupe.membres} membre{groupe.membres > 1 ? 's' : ''}</span>
+                  <span>{groupe.members} membre{groupe.members > 1 ? 's' : ''}</span>
                 </div>
               </div>
               

@@ -87,7 +87,7 @@ export function AdminValidationPage() {
               {filteredHabitants.map((habitant) => (
                 <tr key={habitant.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
-                    <p className="font-medium">{habitant.prenom} {habitant.nom}</p>
+                    <p className="font-medium">{habitant.name} {habitant.surname}</p>
                   </td>
                   <td className="px-6 py-4 text-[var(--color-text-secondary)]">
                     {habitant.email}

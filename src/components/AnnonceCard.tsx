@@ -7,9 +7,9 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 interface AnnonceCardProps {
   annonce: {
     id: string;
-    titre: string;
+    name: string;
     description: string;
-    zone: string;
+    location: string;
     disponibilite: string;
     type: string;
     image?: string;
@@ -39,7 +39,7 @@ export function AnnonceCard({ annonce, onClick, onInterested }: AnnonceCardProps
         <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
           <ImageWithFallback
             src={annonce.image}
-            alt={annonce.titre}
+            alt={annonce.name}
             className="w-full h-full object-cover"
           />
           <div className="absolute top-2 left-2">
@@ -53,7 +53,7 @@ export function AnnonceCard({ annonce, onClick, onInterested }: AnnonceCardProps
         <div className="p-4 space-y-3">
           <div>
             <h4 className="font-medium text-[var(--color-text-primary)] line-clamp-1">
-              {annonce.titre}
+              {annonce.name}
             </h4>
             <p className="text-[var(--color-text-secondary)] text-sm line-clamp-2 mt-1">
               {annonce.description}
@@ -62,7 +62,7 @@ export function AnnonceCard({ annonce, onClick, onInterested }: AnnonceCardProps
 
           <div className="flex items-center gap-1 text-sm text-[var(--color-text-secondary)]">
             <MapPin size={14} />
-            <span>{annonce.zone}</span>
+            <span>{annonce.location}</span>
           </div>
 
           <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)]">

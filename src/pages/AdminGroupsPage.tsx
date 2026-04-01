@@ -13,7 +13,7 @@ export function AdminGroupsPage({ onNavigate }: AdminGroupsPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredGroupes = mockGroupes.filter(groupe =>
-    groupe.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    groupe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     groupe.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -51,7 +51,7 @@ export function AdminGroupsPage({ onNavigate }: AdminGroupsPageProps) {
             </div>
             <div>
               <p className="text-2xl font-bold">
-                {mockGroupes.reduce((acc, g) => acc + g.membres, 0)}
+                {mockGroupes.reduce((acc, g) => acc + g.members, 0)}
               </p>
               <p className="text-sm text-[var(--color-text-secondary)]">Membres total</p>
             </div>
@@ -94,7 +94,7 @@ export function AdminGroupsPage({ onNavigate }: AdminGroupsPageProps) {
           <Card key={groupe.id} hover>
             <div className="p-6 space-y-4">
               <div className="flex items-start justify-between gap-3">
-                <h4 className="flex-1 min-w-0 truncate">{groupe.nom}</h4>
+                <h4 className="flex-1 min-w-0 truncate">{groupe.name}</h4>
                 <Badge variant="level" level={groupe.niveau} />
               </div>
 
@@ -105,7 +105,7 @@ export function AdminGroupsPage({ onNavigate }: AdminGroupsPageProps) {
               <div className="flex items-center gap-4 text-sm text-[var(--color-text-secondary)]">
                 <div className="flex items-center gap-1">
                   <Users size={16} />
-                  <span>{groupe.membres} membres</span>
+                  <span>{groupe.members} membres</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <span>{groupe.annonces.length} annonces</span>

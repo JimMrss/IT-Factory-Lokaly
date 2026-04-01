@@ -6,10 +6,10 @@ import { Users } from 'lucide-react';
 interface GroupeCardProps {
   groupe: {
     id: string;
-    nom: string;
+    name: string;
     description: string;
     niveau: number;
-    membres: number;
+    members: number;
     categorie?: string;
     image?: string;
   };
@@ -28,7 +28,7 @@ export function GroupeCard({ groupe, onClick }: GroupeCardProps) {
         {/* Contenu */}
         <div className="p-4 space-y-3">
           <h4 className="font-medium text-[var(--color-text-primary)] line-clamp-1">
-            {groupe.nom}
+            {groupe.name}
           </h4>
 
           <p className="text-[var(--color-text-secondary)] text-sm line-clamp-2">
@@ -38,7 +38,7 @@ export function GroupeCard({ groupe, onClick }: GroupeCardProps) {
           <div className="flex items-center gap-2 text-[var(--color-text-secondary)] pt-3 border-t border-[var(--color-border)]">
             <Users size={16} />
             <span className="text-sm">
-              {groupe.membres} membre{groupe.membres > 1 ? 's' : ''}
+              {groupe.members} membre{groupe.members > 1 ? 's' : ''}
             </span>
           </div>
         </div>

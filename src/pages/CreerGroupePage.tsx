@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
+import { Select } from '../components/Select';
 import { Card } from '../components/Card';
 import { ArrowLeft, Users, Send } from 'lucide-react';
 import { toast } from 'sonner';
@@ -11,9 +12,9 @@ interface CreerGroupePageProps {
 }
 
 export function CreerGroupePage({ onNavigate }: CreerGroupePageProps) {
-  const [nom, setNom] = useState('');
+  const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [thematique, setThematique] = useState('');
+  const [categorie, setCategorie] = useState('');
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,18 +61,24 @@ export function CreerGroupePage({ onNavigate }: CreerGroupePageProps) {
               <Input
                 label="Nom du groupe"
                 placeholder="Ex: Jardiniers du quartier"
-                value={nom}
-                onChange={(e) => setNom(e.target.value)}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
                 helper="Choisissez un nom clair et évocateur"
               />
-              
-              <Input
-                label="Thématique"
-                placeholder="Ex: Jardinage, Sport, Culture..."
-                value={thematique}
-                onChange={(e) => setThematique(e.target.value)}
+
+              <Select
+                label="Catégorie"
+                placeholder="Sélectionnez une catégorie"
+                value={categorie}
+                onChange={(e) => setCategorie(e.target.value)}
                 required
+                options={[
+                  { value: 'Jardinage', label: 'Jardinage' },
+                  { value: 'Culture', label: 'Culture' },
+                  { value: 'Sport', label: 'Sport' },
+                  { value: 'Bricolage', label: 'Bricolage' }
+                ]}
               />
               
               <Textarea

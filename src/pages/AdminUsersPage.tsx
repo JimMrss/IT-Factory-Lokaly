@@ -10,27 +10,27 @@ import { toast } from 'sonner';
 export function AdminUsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newUser, setNewUser] = useState({ prenom: '', nom: '', identifiant: '' });
+  const [newUser, setNewUser] = useState({ name: '', surname: '', identifier: '' });
 
   const filteredUsers = mockUtilisateurs.filter(user =>
-    user.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.identifiant.toLowerCase().includes(searchTerm.toLowerCase())
+    user.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.identifier.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleCreateUser = () => {
-    toast.success(`Utilisateur ${newUser.prenom} ${newUser.nom} créé. Mot de passe temporaire généré.`);
+    toast.success(`Utilisateur ${newUser.name} ${newUser.surname} créé. Mot de passe temporaire généré.`);
     setShowCreateModal(false);
-    setNewUser({ prenom: '', nom: '', identifiant: '' });
+    setNewUser({ name: '', surname: '', identifier: '' });
   };
 
   const handleToggleStatus = (user: typeof mockUtilisateurs[0]) => {
     const newStatus = user.statut === 'actif' ? 'désactivé' : 'activé';
-    toast.success(`Utilisateur ${user.prenom} ${user.nom} ${newStatus}.`);
+    toast.success(`Utilisateur ${user.name} ${user.surname} ${newStatus}.`);
   };
 
   const handleResetPassword = (user: typeof mockUtilisateurs[0]) => {
-    toast.success(`Nouveau mot de passe généré pour ${user.prenom} ${user.nom}.`);
+    toast.success(`Nouveau mot de passe généré pour ${user.name} ${user.surname}.`);
   };
 
   return (
@@ -90,16 +90,16 @@ export function AdminUsersPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full flex items-center justify-center">
                         <span className="text-white font-medium">
-                          {user.prenom.charAt(0)}{user.nom.charAt(0)}
+                          {user.name.charAt(0)}{user.surname.charAt(0)}
                         </span>
                       </div>
                       <div>
-                        <p className="font-medium">{user.prenom} {user.nom}</p>
+                        <p className="font-medium">{user.name} {user.surname}</p>
                       </div>
                     </div>
                   </td>
                   <td className="p-4">
-                    <span className="text-[var(--color-text-secondary)]">@{user.identifiant}</span>
+                    <span className="text-[var(--color-text-secondary)]">@{user.identifier}</span>
                   </td>
                   <td className="p-4">
                     <span className="text-[var(--color-text-secondary)]">
@@ -160,22 +160,22 @@ export function AdminUsersPage() {
                 <Input
                   label="Prénom"
                   placeholder="Ex: Marie"
-                  value={newUser.prenom}
-                  onChange={(e) => setNewUser({ ...newUser, prenom: e.target.value })}
+                  value={newUser.name}
+                  onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
                   required
                 />
                 <Input
                   label="Nom"
                   placeholder="Ex: Dubois"
-                  value={newUser.nom}
-                  onChange={(e) => setNewUser({ ...newUser, nom: e.target.value })}
+                  value={newUser.surname}
+                  onChange={(e) => setNewUser({ ...newUser, surname: e.target.value })}
                   required
                 />
                 <Input
                   label="Identifiant de connexion"
                   placeholder="Ex: marie.dubois"
-                  value={newUser.identifiant}
-                  onChange={(e) => setNewUser({ ...newUser, identifiant: e.target.value })}
+                  value={newUser.identifier}
+                  onChange={(e) => setNewUser({ ...newUser, identifier: e.target.value })}
                   required
                   helper="L'identifiant sera utilisé pour la connexion"
                 />
@@ -200,7 +200,7 @@ export function AdminUsersPage() {
                   variant="primary"
                   fullWidth
                   onClick={handleCreateUser}
-                  disabled={!newUser.prenom || !newUser.nom || !newUser.identifiant}
+                  disabled={!newUser.name || !newUser.surname || !newUser.identifier}
                 >
                   Créer l'utilisateur
                 </Button>

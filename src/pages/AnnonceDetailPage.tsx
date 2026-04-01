@@ -38,7 +38,7 @@ export function AnnonceDetailPage({ annonce, onNavigate }: AnnonceDetailPageProp
             <div className="aspect-[16/9] overflow-hidden bg-gray-100">
               <ImageWithFallback
                 src={annonce.image}
-                alt={annonce.titre}
+                alt={annonce.name}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -48,7 +48,7 @@ export function AnnonceDetailPage({ annonce, onNavigate }: AnnonceDetailPageProp
               {/* En-tête */}
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-4">
-                  <h1 className="flex-1">{annonce.titre}</h1>
+                  <h1 className="flex-1">{annonce.name}</h1>
                   <Badge variant="accent">{annonce.type}</Badge>
                 </div>
               </div>
@@ -57,7 +57,7 @@ export function AnnonceDetailPage({ annonce, onNavigate }: AnnonceDetailPageProp
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
                   <MapPin size={20} />
-                  <span>{annonce.zone}</span>
+                  <span>{annonce.location}</span>
                 </div>
                 <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
                   <Calendar size={20} />

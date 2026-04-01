@@ -18,10 +18,10 @@ export function AnnoncesPage({ onNavigate }: AnnoncesPageProps) {
   const [showFilters, setShowFilters] = useState(false);
 
   const filteredAnnonces = mockAnnonces.filter((annonce) => {
-    const matchSearch = annonce.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchSearch = annonce.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                        annonce.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchType = !typeFilter || annonce.type === typeFilter;
-    const matchZone = !zoneFilter || annonce.zone === zoneFilter;
+    const matchZone = !zoneFilter || annonce.location === zoneFilter;
     return matchSearch && matchType && matchZone;
   });
 

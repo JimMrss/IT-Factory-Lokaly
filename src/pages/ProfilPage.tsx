@@ -66,7 +66,7 @@ export function ProfilPage({ onNavigate }: ProfilPageProps) {
               </div>
               <div>
                 <h2>{mockUserProfile.nom}</h2>
-                <p className="text-[var(--color-text-secondary)]">@{mockUserProfile.identifiant}</p>
+                <p className="text-[var(--color-text-secondary)]">@{mockUserProfile.identifier}</p>
               </div>
             </div>
             
