@@ -1,23 +1,54 @@
+// src/pages/AnnonceDetailPage.tsx
+// Page de détail d'une annonce
+// useParams récupère l'ID depuis l'URL (ex: /annonces/3 → id = "3")
+// On cherche ensuite l'annonce correspondante dans mockData
+
 import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { Card } from '../components/Card';
 import { MapPin, Calendar, Heart, ArrowLeft, MessageCircle } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { mockAnnonces } from '../data/mockData';
 
-interface AnnonceDetailPageProps {
-  annonce: any;
-  onNavigate: (page: string) => void;
-}
+// Plus de props — on utilise useParams pour lire l'ID depuis l'URL
+export function AnnonceDetailPage() {
+  // useParams lit les paramètres dynamiques de l'URL
+  // Pour l'URL /annonces/3, id vaut "3" (c'est une string)
+  const { id } = useParams();
 
-export function AnnonceDetailPage({ annonce, onNavigate }: AnnonceDetailPageProps) {
+  // useNavigate pour le bouton "retour"
+  const navigate = useNavigate();
+
   const [interested, setInterested] = React.useState(false);
-  
+
+  // On cherche l'annonce dans mockData avec cet ID
+  // id est une string et annonce.id aussi, donc pas besoin de convertir
+  const annonce = mockAnnonces.find(a => a.id === id);
+
+  // Si l'annonce n'existe pas (ID invalide dans l'URL), on affiche un message
+  if (!annonce) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl text-gray-500">Annonce introuvable</p>
+          <button
+            onClick={() => navigate('/annonces')}
+            className="mt-4 text-[var(--color-primary)] hover:underline"
+          >
+            Retour aux annonces
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const handleInterest = () => {
     setInterested(true);
     alert('Merci pour votre intérêt ! Vous pouvez maintenant contacter l\'auteur via le lien ci-dessous.');
   };
-  
+
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -25,12 +56,12 @@ export function AnnonceDetailPage({ annonce, onNavigate }: AnnonceDetailPageProp
         <Button
           variant="outline"
           icon={<ArrowLeft size={20} />}
-          onClick={() => onNavigate('annonces')}
+          onClick={() => navigate('/annonces')}
           className="mb-6"
         >
           Retour aux annonces
         </Button>
-        
+
         {/* Carte principale */}
         <Card>
           <div className="overflow-hidden">
@@ -42,7 +73,7 @@ export function AnnonceDetailPage({ annonce, onNavigate }: AnnonceDetailPageProp
                 className="w-full h-full object-cover"
               />
             </div>
-            
+
             {/* Contenu */}
             <div className="p-6 md:p-8 space-y-6">
               {/* En-tête */}
@@ -52,7 +83,7 @@ export function AnnonceDetailPage({ annonce, onNavigate }: AnnonceDetailPageProp
                   <Badge variant="accent">{annonce.type}</Badge>
                 </div>
               </div>
-              
+
               {/* Informations */}
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
@@ -64,7 +95,7 @@ export function AnnonceDetailPage({ annonce, onNavigate }: AnnonceDetailPageProp
                   <span>{annonce.disponibilite}</span>
                 </div>
               </div>
-              
+
               {/* Description */}
               <div className="space-y-2">
                 <h3>Description</h3>
@@ -72,7 +103,7 @@ export function AnnonceDetailPage({ annonce, onNavigate }: AnnonceDetailPageProp
                   {annonce.description}
                 </p>
               </div>
-              
+
               {/* Auteur */}
               <div className="pt-6 border-t border-[var(--color-border)]">
                 <h4 className="mb-3">Proposé par</h4>
@@ -88,7 +119,7 @@ export function AnnonceDetailPage({ annonce, onNavigate }: AnnonceDetailPageProp
                   </div>
                 </div>
               </div>
-              
+
               {/* Bouton d'intérêt */}
               <div className="pt-6 border-t border-[var(--color-border)]">
                 <Button
@@ -105,7 +136,7 @@ export function AnnonceDetailPage({ annonce, onNavigate }: AnnonceDetailPageProp
             </div>
           </div>
         </Card>
-        
+
         {/* Encadré contact */}
         {interested && (
           <Card className="mt-6">
