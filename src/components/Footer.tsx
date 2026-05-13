@@ -1,12 +1,14 @@
+// src/components/Footer.tsx
+// Pied de page — utilise useNavigate au lieu du prop onNavigate
+
 import React from 'react';
 import { MapPin, Mail, Phone, Facebook, Instagram, Twitter, Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-interface FooterProps {
-  onNavigate?: (page: string) => void;
-}
-
-export function Footer({ onNavigate }: FooterProps) {
+export function Footer() {
   const currentYear = new Date().getFullYear();
+  // useNavigate pour naviguer vers les pages
+  const navigate = useNavigate();
 
   return (
     <footer className="bg-slate-950 text-gray-300 mt-auto border-t-4 border-[var(--color-primary)]">
@@ -44,14 +46,14 @@ export function Footer({ onNavigate }: FooterProps) {
             <h4 className="font-semibold text-lg mb-4 text-gray-300">Navigation</h4>
             <ul className="space-y-3">
               {[
-                { label: 'Accueil', page: 'home' },
-                { label: 'Annonces', page: 'annonces' },
-                { label: 'Groupes', page: 'groupes' },
-                { label: 'Mon Profil', page: 'profil' },
+                { label: 'Accueil', path: '/' },
+                { label: 'Annonces', path: '/annonces' },
+                { label: 'Groupes', path: '/groupes' },
+                { label: 'Mon Profil', path: '/profil' },
               ].map((item) => (
-                <li key={item.page}>
+                <li key={item.path}>
                   <button
-                    onClick={() => onNavigate?.(item.page)}
+                    onClick={() => navigate(item.path)}
                     className="text-gray-400 hover:text-white hover:translate-x-1 transition-all text-sm inline-block"
                   >
                     {item.label}

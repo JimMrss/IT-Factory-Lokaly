@@ -1,22 +1,33 @@
+// src/components/AdminSidebar.tsx
+// Sidebar du panel admin
+// useNavigate + useLocation remplacent les props onNavigate et currentPage
+
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, UserPlus, BarChart3, Palette, Menu, X, UsersRound, ClipboardCheck } from 'lucide-react';
 
-interface AdminSidebarProps {
-  currentPage: string;
-  onNavigate: (page: string) => void;
-}
-
-export function AdminSidebar({ currentPage, onNavigate }: AdminSidebarProps) {
+// Plus besoin de props — useNavigate et useLocation font le travail
+export function AdminSidebar() {
   const [isOpen, setIsOpen] = React.useState(false);
 
+  // useNavigate pour aller sur une page admin
+  const navigate = useNavigate();
+
+  // useLocation pour savoir quelle page admin est active
+  const location = useLocation();
+
+  // Liste des pages admin avec leur URL complète
   const menuItems = [
-    { id: 'admin-dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'admin-users', label: 'Utilisateurs', icon: UserPlus },
-    { id: 'admin-groups', label: 'Groupes', icon: UsersRound },
-    { id: 'admin-stats', label: 'Statistiques', icon: BarChart3 },
-    { id: 'admin-validation', label: 'Validation', icon: ClipboardCheck },
-    { id: 'admin-customization', label: 'Personnalisation', icon: Palette },
+    { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/admin/utilisateurs', label: 'Utilisateurs', icon: UserPlus },
+    { path: '/admin/groupes', label: 'Groupes', icon: UsersRound },
+    { path: '/admin/stats', label: 'Statistiques', icon: BarChart3 },
+    { path: '/admin/validation', label: 'Validation', icon: ClipboardCheck },
+    { path: '/admin/personnalisation', label: 'Personnalisation', icon: Palette },
   ];
+
+  // Un item est actif si son chemin correspond exactement à l'URL actuelle
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <>
@@ -28,7 +39,7 @@ export function AdminSidebar({ currentPage, onNavigate }: AdminSidebarProps) {
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Overlay mobile */}
+      {/* Overlay mobile — fond sombre quand la sidebar est ouverte */}
       {isOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/50 z-40"
@@ -36,60 +47,61 @@ export function AdminSidebar({ currentPage, onNavigate }: AdminSidebarProps) {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar principale */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen bg-white border-r border-[var(--color-border)] w-64 z-40 transition-transform duration-300 flex flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`
+          fixed lg:static inset-y-0 left-0 z-40
+          w-64 bg-slate-900 text-white
+          transform transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
       >
-        {/* Header */}
-        <div className="p-6 border-b border-[var(--color-border)]">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">L</span>
-            </div>
-            <div>
-              <h3 className="font-bold text-[var(--color-primary)]">Lokaly</h3>
-              <p className="text-xs text-[var(--color-text-secondary)]">Administration</p>
-            </div>
+        {/* Logo en haut de la sidebar */}
+        <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-700">
+          <div className="w-9 h-9 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-lg">L</span>
+          </div>
+          <div>
+            <p className="font-bold text-sm">Lokaly Admin</p>
+            <p className="text-xs text-slate-400">Panel de gestion</p>
           </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <ul className="space-y-2">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = currentPage === item.id;
-              return (
-                <li key={item.id}>
-                  <button
-                    onClick={() => {
-                      onNavigate(item.id);
-                      setIsOpen(false);
-                    }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                      isActive
-                        ? 'bg-[var(--color-primary)] text-white'
-                        : 'text-[var(--color-text-primary)] hover:bg-gray-100'
-                    }`}
-                  >
-                    <Icon size={20} />
-                    <span>{item.label}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+        {/* Menu de navigation */}
+        <nav className="p-4 space-y-1">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            // On vérifie si cette page est la page active
+            const active = isActive(item.path);
+            return (
+              <button
+                key={item.path}
+                onClick={() => {
+                  // navigate change l'URL et affiche la bonne page
+                  navigate(item.path);
+                  // On ferme la sidebar sur mobile après avoir cliqué
+                  setIsOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                  active
+                    ? 'bg-[var(--color-primary)] text-white'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Icon size={18} />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-[var(--color-border)]">
+        {/* Bouton retour vers le site public */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700">
           <button
-            onClick={() => onNavigate('home')}
-            className="w-full px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
+            onClick={() => navigate('/')}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-all text-sm"
           >
-            ← Retour au site
+            <span>← Retour au site</span>
           </button>
         </div>
       </aside>
