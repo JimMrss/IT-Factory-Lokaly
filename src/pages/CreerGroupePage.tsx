@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
@@ -7,11 +8,9 @@ import { Card } from '../components/Card';
 import { ArrowLeft, Users, Send } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface CreerGroupePageProps {
-  onNavigate: (page: string) => void;
-}
-
-export function CreerGroupePage({ onNavigate }: CreerGroupePageProps) {
+export function CreerGroupePage() {
+  // useNavigate retourne une fonction navigate() pour changer de page
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [categorie, setCategorie] = useState('');
@@ -19,7 +18,7 @@ export function CreerGroupePage({ onNavigate }: CreerGroupePageProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast.success('Groupe créé avec succès ! Il commencera au Niveau 1.');
-    onNavigate('groupes');
+    navigate('/groupes');
   };
   
   return (
@@ -29,7 +28,7 @@ export function CreerGroupePage({ onNavigate }: CreerGroupePageProps) {
         <Button
           variant="outline"
           icon={<ArrowLeft size={20} />}
-          onClick={() => onNavigate('groupes')}
+          onClick={() => navigate('/groupes')}
           className="mb-6"
         >
           Retour
@@ -135,7 +134,7 @@ export function CreerGroupePage({ onNavigate }: CreerGroupePageProps) {
               type="button"
               variant="outline"
               fullWidth
-              onClick={() => onNavigate('groupes')}
+              onClick={() => navigate('/groupes')}
             >
               Annuler
             </Button>

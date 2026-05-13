@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { AnnonceCard } from '../components/AnnonceCard';
 import { GroupeCard } from '../components/GroupeCard';
@@ -6,11 +7,9 @@ import { Plus, ArrowRight } from 'lucide-react';
 import { mockAnnonces, mockGroupes, mockStats } from '../data/mockData';
 import { toast } from 'sonner';
 
-interface HomePageProps {
-  onNavigate: (page: string, data?: any) => void;
-}
-
-export function HomePage({ onNavigate }: HomePageProps) {
+export function HomePage() {
+  // useNavigate retourne une fonction navigate() pour changer de page
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
       {/* Hero Section */}
@@ -27,13 +26,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
               <Button
                 variant="white"
                 icon={<Plus size={18} />}
-                onClick={() => onNavigate('nouvelle-annonce')}
+                onClick={() => navigate('/annonces/nouvelle')}
               >
                 Nouvelle annonce
               </Button>
               <Button
                 variant="outline"
-                onClick={() => onNavigate('annonces')}
+                onClick={() => navigate('/annonces')}
                 className="border-white text-white hover:bg-white hover:text-[var(--color-primary)]"
               >
                 Voir les annonces
@@ -72,7 +71,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <Button
               variant="outline"
               icon={<ArrowRight size={18} />}
-              onClick={() => onNavigate('annonces')}
+              onClick={() => navigate('/annonces')}
               className="hidden sm:flex"
             >
               Voir toutes
@@ -84,7 +83,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
               <AnnonceCard
                 key={annonce.id}
                 annonce={annonce}
-                onClick={() => onNavigate('annonce-detail', annonce)}
+                onClick={() => navigate('/annonces/' + annonce.id)}
                 onInterested={() => toast.success('Intérêt manifesté ! Le contact sera partagé.')}
               />
             ))}
@@ -94,7 +93,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <Button
               variant="outline"
               icon={<ArrowRight size={18} />}
-              onClick={() => onNavigate('annonces')}
+              onClick={() => navigate('/annonces')}
             >
               Voir toutes les annonces
             </Button>
@@ -115,7 +114,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <Button
               variant="outline"
               icon={<ArrowRight size={18} />}
-              onClick={() => onNavigate('groupes')}
+              onClick={() => navigate('/groupes')}
               className="hidden sm:flex"
             >
               Voir tous
@@ -127,7 +126,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
               <GroupeCard
                 key={groupe.id}
                 groupe={groupe}
-                onClick={() => onNavigate('groupe-detail', groupe)}
+                onClick={() => navigate('/groupes/' + groupe.id)}
               />
             ))}
           </div>
@@ -136,7 +135,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <Button
               variant="outline"
               icon={<ArrowRight size={18} />}
-              onClick={() => onNavigate('groupes')}
+              onClick={() => navigate('/groupes')}
             >
               Voir tous les groupes
             </Button>

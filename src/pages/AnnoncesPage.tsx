@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Input } from '../components/Input';
 import { Select } from '../components/Select';
 import { AnnonceCard } from '../components/AnnonceCard';
@@ -7,11 +8,9 @@ import { Search, SlidersHorizontal, Plus } from 'lucide-react';
 import { mockAnnonces } from '../data/mockData';
 import { toast } from 'sonner';
 
-interface AnnoncesPageProps {
-  onNavigate: (page: string, data?: any) => void;
-}
-
-export function AnnoncesPage({ onNavigate }: AnnoncesPageProps) {
+export function AnnoncesPage() {
+  // useNavigate retourne une fonction navigate() pour changer de page
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [zoneFilter, setZoneFilter] = useState('');
@@ -39,7 +38,7 @@ export function AnnoncesPage({ onNavigate }: AnnoncesPageProps) {
           <Button
             variant="primary"
             icon={<Plus size={20} />}
-            onClick={() => onNavigate('nouvelle-annonce')}
+            onClick={() => navigate('/annonces/nouvelle')}
           >
             Nouvelle annonce
           </Button>
@@ -115,7 +114,7 @@ export function AnnoncesPage({ onNavigate }: AnnoncesPageProps) {
               <AnnonceCard
                 key={annonce.id}
                 annonce={annonce}
-                onClick={() => onNavigate('annonce-detail', annonce)}
+                onClick={() => navigate('/annonces/' + annonce.id)}
                 onInterested={() => toast.success('Intérêt manifesté ! Le contact sera partagé.')}
               />
             ))}

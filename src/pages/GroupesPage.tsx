@@ -1,14 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { GroupeCard } from '../components/GroupeCard';
 import { Plus } from 'lucide-react';
 import { mockGroupes } from '../data/mockData';
 
-interface GroupesPageProps {
-  onNavigate: (page: string, data?: any) => void;
-}
-
-export function GroupesPage({ onNavigate }: GroupesPageProps) {
+export function GroupesPage() {
+  // useNavigate retourne une fonction navigate() pour changer de page
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -23,7 +22,7 @@ export function GroupesPage({ onNavigate }: GroupesPageProps) {
           <Button
             variant="primary"
             icon={<Plus size={20} />}
-            onClick={() => onNavigate('creer-groupe')}
+            onClick={() => navigate('/groupes/creer')}
           >
             Créer un groupe
           </Button>
@@ -35,7 +34,7 @@ export function GroupesPage({ onNavigate }: GroupesPageProps) {
             <GroupeCard
               key={groupe.id}
               groupe={groupe}
-              onClick={() => onNavigate('groupe-detail', groupe)}
+              onClick={() => navigate('/groupes/' + groupe.id)}
             />
           ))}
         </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
@@ -8,11 +9,9 @@ import { User, Save, Edit2, Plus, X } from 'lucide-react';
 import { mockUserProfile } from '../data/mockData';
 import { toast } from 'sonner';
 
-interface ProfilPageProps {
-  onNavigate: (page: string) => void;
-}
-
-export function ProfilPage({ onNavigate }: ProfilPageProps) {
+export function ProfilPage() {
+  // useNavigate retourne une fonction navigate() pour changer de page
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [bio, setBio] = useState(mockUserProfile.bio);
   const [contactExterne, setContactExterne] = useState(mockUserProfile.contactExterne);

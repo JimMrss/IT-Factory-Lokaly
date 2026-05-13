@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
@@ -7,11 +8,9 @@ import { Card } from '../components/Card';
 import { ArrowLeft, Sparkles, Eye, Send, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface NouvelleAnnoncePageProps {
-  onNavigate: (page: string) => void;
-}
-
-export function NouvelleAnnoncePage({ onNavigate }: NouvelleAnnoncePageProps) {
+export function NouvelleAnnoncePage() {
+  // useNavigate retourne une fonction navigate() pour changer de page
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [description, setDescription] = useState('');
@@ -44,7 +43,7 @@ export function NouvelleAnnoncePage({ onNavigate }: NouvelleAnnoncePageProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast.success('Annonce publiée avec succès !');
-    onNavigate('annonces');
+    navigate('/annonces');
   };
   
   return (
@@ -54,7 +53,7 @@ export function NouvelleAnnoncePage({ onNavigate }: NouvelleAnnoncePageProps) {
         <Button
           variant="outline"
           icon={<ArrowLeft size={20} />}
-          onClick={() => onNavigate('home')}
+          onClick={() => navigate('/')}
           className="mb-6"
         >
           Retour
