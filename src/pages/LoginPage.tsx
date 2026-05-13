@@ -1,21 +1,29 @@
+// src/pages/LoginPage.tsx
+// Page de connexion et d'inscription
+// Utilise useAuth() pour connecter l'utilisateur
+// Utilise useNavigate() pour rediriger après connexion
+
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Users, Heart, MessageCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
-interface LoginPageProps {
-  onLogin: (user: { username: string; email?: string }) => void;
-}
+// Plus besoin de props — on utilise le contexte et le router directement
+export function LoginPage() {
+  // useNavigate permet de changer de page en changeant l'URL
+  const navigate = useNavigate();
 
-export function LoginPage({ onLogin }: LoginPageProps) {
+  // useAuth donne accès à la fonction login de notre AuthContext
+  const { login } = useAuth();
+
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Formulaire login
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
 
-  // Formulaire register
   const [registerUsername, setRegisterUsername] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
@@ -26,12 +34,14 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     setError('');
     setIsLoading(true);
 
-    // Simulation d'un délai réseau
+    // Simulation d'un délai réseau (sera remplacé par un vrai appel API)
     await new Promise(resolve => setTimeout(resolve, 800));
 
     if (loginUsername === 'test' && loginPassword === 'test') {
-      localStorage.setItem('lokaly_user', JSON.stringify({ username: loginUsername }));
-      onLogin({ username: loginUsername });
+      // On utilise login() du contexte au lieu de onLogin prop
+      login({ username: loginUsername });
+      // Après connexion, on redirige vers la page d'accueil
+      navigate('/');
     } else {
       setError('Identifiants incorrects');
       setIsLoading(false);
@@ -61,8 +71,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     await new Promise(resolve => setTimeout(resolve, 800));
 
     const user = { username: registerUsername, email: registerEmail };
-    localStorage.setItem('lokaly_user', JSON.stringify(user));
-    onLogin(user);
+    login(user);
+    navigate('/');
   };
 
   return (
