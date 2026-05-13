@@ -5,7 +5,7 @@
   import path from 'path';
 
   export default defineConfig({
-    base: '/lokaly/',
+    base: '/',
     plugins: [react(), tailwindcss()],
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],

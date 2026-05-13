@@ -13,6 +13,9 @@ import { AdminLayout } from './layouts/AdminLayout';
 // On importe le composant de protection
 import { ProtectedRoute } from './components/ProtectedRoute';
 
+// On importe la page d'erreur personnalisée
+import { ErrorPage } from './pages/ErrorPage';
+
 // On importe toutes les pages
 import { LoginPage } from './pages/LoginPage';
 import { HomePage } from './pages/HomePage';
@@ -41,12 +44,14 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+    errorElement: <ErrorPage />,
   },
 
   // ========== PAGES PUBLIQUES ==========
   // Ces pages sont protégées (login requis) et utilisent le PublicLayout (Header + Footer)
   {
     path: '/',
+    errorElement: <ErrorPage />,
     element: (
       // ProtectedRoute vérifie que l'utilisateur est connecté
       // S'il ne l'est pas → redirige vers /login
@@ -89,6 +94,7 @@ export const router = createBrowserRouter([
   // Ces pages utilisent le AdminLayout (avec la sidebar)
   {
     path: '/admin',
+    errorElement: <ErrorPage />,
     element: (
       <ProtectedRoute>
         <AdminLayout />
