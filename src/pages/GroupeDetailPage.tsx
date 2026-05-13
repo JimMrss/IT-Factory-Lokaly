@@ -1,21 +1,48 @@
+// src/pages/GroupeDetailPage.tsx
+// Page de détail d'un groupe
+// Même principe que AnnonceDetailPage : useParams + find dans mockData
+
 import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { Card } from '../components/Card';
 import { AnnonceCard } from '../components/AnnonceCard';
 import { ArrowLeft, Users, UserPlus, TrendingUp } from 'lucide-react';
-import { mockAnnonces } from '../data/mockData';
+import { mockAnnonces, mockGroupes } from '../data/mockData';
 import { toast } from 'sonner';
 
-interface GroupeDetailPageProps {
-  groupe: any;
-  onNavigate: (page: string, data?: any) => void;
-}
+// Plus de props groupe et onNavigate
+export function GroupeDetailPage() {
+  // useParams lit l'ID depuis l'URL (/groupes/2 → id = "2")
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-export function GroupeDetailPage({ groupe, onNavigate }: GroupeDetailPageProps) {
   const [isMember, setIsMember] = React.useState(false);
+
+  // On cherche le groupe dans mockData
+  const groupe = mockGroupes.find(g => g.id === id);
+
+  // Si le groupe n'existe pas, on affiche un message d'erreur
+  if (!groupe) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl text-gray-500">Groupe introuvable</p>
+          <button
+            onClick={() => navigate('/groupes')}
+            className="mt-4 text-[var(--color-primary)] hover:underline"
+          >
+            Retour aux groupes
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Les annonces liées à ce groupe
   const groupeAnnonces = mockAnnonces.filter((a) => groupe.annonces?.includes(a.id));
-  
+
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -23,7 +50,7 @@ export function GroupeDetailPage({ groupe, onNavigate }: GroupeDetailPageProps) 
         <Button
           variant="outline"
           icon={<ArrowLeft size={20} />}
-          onClick={() => onNavigate('groupes')}
+          onClick={() => navigate('/groupes')}
           className="mb-6"
         >
           Retour aux groupes
@@ -69,7 +96,7 @@ export function GroupeDetailPage({ groupe, onNavigate }: GroupeDetailPageProps) 
                 <AnnonceCard
                   key={annonce.id}
                   annonce={annonce}
-                  onClick={() => onNavigate('annonce-detail', annonce)}
+                  onClick={() => navigate('/annonces/' + annonce.id)}
                   onInterested={() => toast.success('Intérêt manifesté ! Le contact sera partagé.')}
                 />
               ))}
