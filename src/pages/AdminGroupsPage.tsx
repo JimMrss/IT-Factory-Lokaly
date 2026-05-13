@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { Search, Users, Eye, TrendingUp, Star } from 'lucide-react';
 import { mockGroupes } from '../data/mockData';
 
-interface AdminGroupsPageProps {
-  onNavigate: (page: string, data?: any) => void;
-}
-
-export function AdminGroupsPage({ onNavigate }: AdminGroupsPageProps) {
+// Plus de props onNavigate — useNavigate fait le travail
+export function AdminGroupsPage() {
   const [searchTerm, setSearchTerm] = useState('');
+
+  // useNavigate pour naviguer vers le détail d'un groupe
+  const navigate = useNavigate();
 
   const filteredGroupes = mockGroupes.filter(groupe =>
     groupe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -18,7 +19,8 @@ export function AdminGroupsPage({ onNavigate }: AdminGroupsPageProps) {
   );
 
   const handleViewGroup = (groupe: typeof mockGroupes[0]) => {
-    onNavigate('admin-group-detail', groupe);
+    // Au lieu de passer l'objet entier, on navigue vers l'URL avec l'ID
+    navigate('/admin/groupes/' + groupe.id);
   };
 
   return (
