@@ -1,15 +1,16 @@
+// src/pages/AdminGroupDetailPage.tsx
+// Page de détail d'un groupe dans le panel admin
+// Utilise useParams pour lire l'ID depuis /admin/groupes/:id
+
 import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { ArrowLeft, Users, Calendar, Heart, UserMinus, Crown } from 'lucide-react';
+import { mockGroupes } from '../data/mockData';
 
-interface AdminGroupDetailPageProps {
-  groupe: any;
-  onNavigate: (page: string, data?: any) => void;
-}
-
-// Données mock pour les membres et les intéressés
+// Données mock locales pour les membres (resteront jusqu'à l'implémentation du backend)
 const mockMembres = [
   { id: '1', nom: 'Marie Dubois', role: 'admin', dateAdhesion: '2024-06-15' },
   { id: '2', nom: 'Pierre Leroy', role: 'membre', dateAdhesion: '2024-07-20' },
@@ -23,20 +24,28 @@ const mockInteresses = [
   { id: '3', nom: 'Emma Rousseau', annonce: 'Échange de graines', date: '2024-12-08' },
 ];
 
-export function AdminGroupDetailPage({ groupe, onNavigate }: AdminGroupDetailPageProps) {
+// Plus de props groupe et onNavigate
+export function AdminGroupDetailPage() {
   const [activeTab, setActiveTab] = useState<'membres' | 'interesses'>('membres');
 
+  // useParams lit l'ID depuis /admin/groupes/2 → id = "2"
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  // On cherche le groupe dans mockData
+  const groupe = mockGroupes.find(g => g.id === id);
+
+  // Si le groupe n'existe pas
   if (!groupe) {
     return (
-      <div className="p-8 text-center">
-        <p className="text-[var(--color-text-secondary)]">Groupe non trouvé</p>
-        <Button
-          variant="outline"
-          onClick={() => onNavigate('admin-groups')}
-          className="mt-4"
+      <div className="text-center py-12">
+        <p className="text-xl text-gray-500">Groupe introuvable</p>
+        <button
+          onClick={() => navigate('/admin/groupes')}
+          className="mt-4 text-[var(--color-primary)] hover:underline"
         >
-          Retour aux groupes
-        </Button>
+          Retour à la liste
+        </button>
       </div>
     );
   }
@@ -48,7 +57,7 @@ export function AdminGroupDetailPage({ groupe, onNavigate }: AdminGroupDetailPag
         <Button
           variant="outline"
           icon={<ArrowLeft size={20} />}
-          onClick={() => onNavigate('admin-groups')}
+          onClick={() => navigate('/admin/groupes')}
           className="mb-4"
         >
           Retour aux groupes
