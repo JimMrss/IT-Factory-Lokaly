@@ -1,33 +1,59 @@
+// src/components/Header.tsx
+// Barre de navigation en haut de toutes les pages publiques
+// useNavigate remplace onNavigate
+// useLocation remplace currentPage (pour savoir quelle page est active)
+// useAuth remplace les props user et onLogout
+
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { Home, FileText, Users, User, Menu, X, LogOut } from 'lucide-react';
 
-interface HeaderProps {
-  communityName?: string;
-  onNavigate: (page: string) => void;
-  currentPage: string;
-  user?: { username: string; email?: string };
-  onLogout?: () => void;
-}
-
-export function Header({ communityName = 'Commune de Tori', onNavigate, currentPage, user, onLogout }: HeaderProps) {
+// Plus de props nécessaires — tout vient des hooks
+export function Header({ communityName = 'Commune de Tori' }: { communityName?: string }) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
+  // useNavigate retourne une fonction pour changer d'URL
+  const navigate = useNavigate();
+
+  // useLocation retourne l'objet URL actuel — on utilise pathname pour savoir où on est
+  const location = useLocation();
+
+  // useAuth donne accès à l'utilisateur connecté et à logout
+  const { user, logout } = useAuth();
+
+  // Liste des liens de navigation avec leur URL
   const navItems = [
-    { id: 'home', label: 'Accueil', icon: Home },
-    { id: 'annonces', label: 'Annonces', icon: FileText },
-    { id: 'groupes', label: 'Groupes', icon: Users },
-    { id: 'profil', label: 'Profil', icon: User },
+    { path: '/', label: 'Accueil', icon: Home },
+    { path: '/annonces', label: 'Annonces', icon: FileText },
+    { path: '/groupes', label: 'Groupes', icon: Users },
+    { path: '/profil', label: 'Profil', icon: User },
   ];
+
+  // Une page est "active" si son chemin correspond à l'URL actuelle
+  // Pour l'accueil, on vérifie que c'est exactement "/"
+  const isActive = (path: string) => {
+    if (path === '/') return location.pathname === '/';
+    // Pour les autres pages, on vérifie si l'URL commence par le chemin
+    // Ex: /annonces/1 → isActive('/annonces') = true
+    return location.pathname.startsWith(path);
+  };
+
+  const handleLogout = () => {
+    logout();
+    // Après déconnexion, on redirige vers /login
+    navigate('/login');
+  };
 
   return (
     <header className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo et nom */}
+          {/* Logo — clique pour aller à l'accueil */}
           <div className="flex items-center gap-4">
             <div
               className="flex items-center gap-2 cursor-pointer"
-              onClick={() => onNavigate('home')}
+              onClick={() => navigate('/')}
             >
               <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">L</span>
@@ -43,13 +69,13 @@ export function Header({ communityName = 'Commune de Tori', onNavigate, currentP
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = currentPage === item.id;
+              const active = isActive(item.path);
               return (
                 <button
-                  key={item.id}
-                  onClick={() => onNavigate(item.id)}
+                  key={item.path}
+                  onClick={() => navigate(item.path)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                    isActive
+                    active
                       ? 'bg-[var(--color-primary)] text-white'
                       : 'text-[var(--color-text-primary)] hover:bg-gray-100'
                   }`}
@@ -61,7 +87,7 @@ export function Header({ communityName = 'Commune de Tori', onNavigate, currentP
             })}
           </nav>
 
-          {/* User info et déconnexion desktop */}
+          {/* Infos utilisateur et bouton déconnexion */}
           <div className="hidden md:flex items-center gap-3">
             {user && (
               <>
@@ -76,7 +102,7 @@ export function Header({ communityName = 'Commune de Tori', onNavigate, currentP
                   </span>
                 </div>
                 <button
-                  onClick={onLogout}
+                  onClick={handleLogout}
                   className="p-2 text-gray-500 hover:text-[var(--color-danger)] hover:bg-red-50 rounded-lg transition-colors"
                   title="Se déconnecter"
                 >
@@ -95,10 +121,9 @@ export function Header({ communityName = 'Commune de Tori', onNavigate, currentP
           </button>
         </div>
 
-        {/* Menu mobile */}
+        {/* Menu mobile déroulant */}
         {mobileMenuOpen && (
           <nav className="md:hidden py-4 border-t border-[var(--color-border)]">
-            {/* User info mobile */}
             {user && (
               <div className="flex items-center gap-3 px-4 py-3 mb-2 bg-gray-50 rounded-lg mx-2">
                 <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full flex items-center justify-center">
@@ -115,16 +140,16 @@ export function Header({ communityName = 'Commune de Tori', onNavigate, currentP
 
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = currentPage === item.id;
+              const active = isActive(item.path);
               return (
                 <button
-                  key={item.id}
+                  key={item.path}
                   onClick={() => {
-                    onNavigate(item.id);
+                    navigate(item.path);
                     setMobileMenuOpen(false);
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-3 transition-all ${
-                    isActive
+                    active
                       ? 'bg-[var(--color-primary)] text-white'
                       : 'text-[var(--color-text-primary)] hover:bg-gray-100'
                   }`}
@@ -135,11 +160,10 @@ export function Header({ communityName = 'Commune de Tori', onNavigate, currentP
               );
             })}
 
-            {/* Bouton déconnexion mobile */}
-            {user && onLogout && (
+            {user && (
               <button
                 onClick={() => {
-                  onLogout();
+                  handleLogout();
                   setMobileMenuOpen(false);
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 mt-2 text-[var(--color-danger)] hover:bg-red-50 transition-all border-t border-[var(--color-border)]"
