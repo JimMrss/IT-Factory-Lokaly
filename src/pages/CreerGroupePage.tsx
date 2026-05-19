@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { B_groupes } from '../Composables/BRIDGE_groupe';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
@@ -15,10 +16,15 @@ export function CreerGroupePage() {
   const [description, setDescription] = useState('');
   const [categorie, setCategorie] = useState('');
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Groupe créé avec succès ! Il commencera au Niveau 1.');
-    navigate('/groupes');
+    try {
+      await B_groupes().createGroup({ name, description, category: categorie } as any);
+      toast.success('Groupe créé avec succès ! Il commencera au Niveau 1.');
+      navigate('/groupes');
+    } catch {
+      toast.error('Erreur lors de la création. Réessayez.');
+    }
   };
   
   return (

@@ -2,37 +2,75 @@
 // Page de détail d'un groupe
 // Même principe que AnnonceDetailPage : useParams + find dans mockData
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { Card } from '../components/Card';
 import { AnnonceCard } from '../components/AnnonceCard';
 import { ArrowLeft, Users, UserPlus, TrendingUp } from 'lucide-react';
-import { mockAnnonces, mockGroupes } from '../data/mockData';
+import { B_groupes } from '../Composables/BRIDGE_groupe';
+import { B_Annonces } from '../Composables/BRIDGE_annonces';
+import { B_users } from '../Composables/BRIDGE_users';
 import { toast } from 'sonner';
 
-// Plus de props groupe et onNavigate
+const mapAnnonce = (a: any, users: any[]) => {
+  const user = users.find((u) => u.user_id === a.provider);
+  return {
+    id: String(a.annonce_id),
+    name: a.name,
+    description: a.description,
+    location: a.location,
+    disponibilite: a.disponibilite || (a.date ? `${a.date}${a.hour ? ' ' + a.hour : ''}` : ''),
+    type: a.type || a.state || '',
+    auteur: { nom: user ? `${user.name} ${user.surname}` : 'Membre de la communauté' },
+  };
+};
+
 export function GroupeDetailPage() {
-  // useParams lit l'ID depuis l'URL (/groupes/2 → id = "2")
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [isMember, setIsMember] = React.useState(false);
+  const [groupe, setGroupe] = useState<any>(null);
+  const [annonces, setAnnonces] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isMember, setIsMember] = useState(false);
 
-  // On cherche le groupe dans mockData
-  const groupe = mockGroupes.find(g => g.id === id);
+  const [users, setUsers] = useState<any[]>([]);
 
-  // Si le groupe n'existe pas, on affiche un message d'erreur
-  if (!groupe) {
+  useEffect(() => {
+    if (!id) return;
+    Promise.all([
+      B_groupes().getGroup(id),
+      B_Annonces().getAllAnnonces(),
+      B_users().getAllUsers(),
+    ])
+      .then(([g, allAnnonces, allUsers]) => {
+        setGroupe(g);
+        setUsers(Array.isArray(allUsers) ? allUsers : []);
+        const ids = (g.annonces || []).map(Number);
+        setAnnonces(
+          (Array.isArray(allAnnonces) ? allAnnonces : [])
+            .filter((a: any) => ids.includes(a.annonce_id))
+        );
+      })
+      .catch(() => setError('Groupe introuvable.'))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+
+  if (error || !groupe) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl text-gray-500">Groupe introuvable</p>
-          <button
-            onClick={() => navigate('/groupes')}
-            className="mt-4 text-[var(--color-primary)] hover:underline"
-          >
+          <button onClick={() => navigate('/groupes')} className="mt-4 text-[var(--color-primary)] hover:underline">
             Retour aux groupes
           </button>
         </div>
@@ -40,8 +78,9 @@ export function GroupeDetailPage() {
     );
   }
 
-  // Les annonces liées à ce groupe
-  const groupeAnnonces = mockAnnonces.filter((a) => groupe.annonces?.includes(a.id));
+  const membersCount = Array.isArray(groupe.members) ? groupe.members.length : 0;
+  const niveau = parseInt(groupe.niveau) || 1;
+  const groupeAnnonces = annonces.map((a) => mapAnnonce(a, users));
 
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
@@ -63,23 +102,34 @@ export function GroupeDetailPage() {
               <div className="flex-1 space-y-3">
                 <div className="flex items-center gap-3 flex-wrap">
                   <h1>{groupe.name}</h1>
-                  <Badge variant="level" level={groupe.niveau}>
-                    Niveau {groupe.niveau}
-                  </Badge>
+                  <Badge variant="level" level={niveau}>Niveau {niveau}</Badge>
                 </div>
                 <p className="text-[var(--color-text-secondary)]">
                   {groupe.description}
                 </p>
                 <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
                   <Users size={20} />
-                  <span>{groupe.members} membre{groupe.members > 1 ? 's' : ''}</span>
+                  <span>{membersCount} membre{membersCount > 1 ? 's' : ''}</span>
                 </div>
               </div>
               
               <Button
                 variant={isMember ? 'secondary' : 'primary'}
                 icon={<UserPlus size={20} />}
-                onClick={() => setIsMember(!isMember)}
+                onClick={async () => {
+                  try {
+                    if (isMember) {
+                      await B_groupes().removeMemberFromGroup(groupe.group_id, 1);
+                      toast.success('Vous avez quitté le groupe.');
+                    } else {
+                      await B_groupes().addMemberToGroup(groupe.group_id, 1);
+                      toast.success('Vous avez rejoint le groupe !');
+                    }
+                    setIsMember(!isMember);
+                  } catch {
+                    toast.error('Erreur, réessayez.');
+                  }
+                }}
               >
                 {isMember ? 'Membre ✓' : 'Rejoindre le groupe'}
               </Button>

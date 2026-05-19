@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { B_Annonces } from '../Composables/BRIDGE_annonces';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
@@ -40,10 +41,22 @@ export function NouvelleAnnoncePage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Annonce publiée avec succès !');
-    navigate('/annonces');
+    try {
+      await B_Annonces().createAnnonce({
+        name,
+        description,
+        location: zone,
+        type,
+        disponibilite,
+        state: 'disponible',
+      });
+      toast.success('Annonce publiée avec succès !');
+      navigate('/annonces');
+    } catch {
+      toast.error('Erreur lors de la publication. Réessayez.');
+    }
   };
   
   return (

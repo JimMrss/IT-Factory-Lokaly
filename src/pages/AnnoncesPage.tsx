@@ -1,28 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Input } from '../components/Input';
 import { Select } from '../components/Select';
 import { AnnonceCard } from '../components/AnnonceCard';
 import { Button } from '../components/Button';
 import { Search, SlidersHorizontal, Plus } from 'lucide-react';
-import { mockAnnonces } from '../data/mockData';
+import { B_Annonces } from '../Composables/BRIDGE_annonces';
+import { B_users } from '../Composables/BRIDGE_users';
 import { toast } from 'sonner';
 
+const mapAnnonce = (a: any, users: any[]) => {
+  const user = users.find((u) => u.user_id === a.provider);
+  return {
+    id: String(a.annonce_id),
+    name: a.name,
+    description: a.description,
+    location: a.location,
+    disponibilite: a.disponibilite || (a.date ? `${a.date}${a.hour ? ' ' + a.hour : ''}` : ''),
+    type: a.type || a.state || '',
+    auteur: { nom: user ? `${user.name} ${user.surname}` : 'Membre de la communauté' },
+  };
+};
+
 export function AnnoncesPage() {
-  // useNavigate retourne une fonction navigate() pour changer de page
   const navigate = useNavigate();
+  const [annonces, setAnnonces] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
-  const [zoneFilter, setZoneFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  const filteredAnnonces = mockAnnonces.filter((annonce) => {
-    const matchSearch = annonce.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                       annonce.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchType = !typeFilter || annonce.type === typeFilter;
-    const matchZone = !zoneFilter || annonce.location === zoneFilter;
-    return matchSearch && matchType && matchZone;
-  });
+  useEffect(() => {
+    Promise.all([B_Annonces().getAllAnnonces(), B_users().getAllUsers()])
+      .then(([annoncesData, usersData]) => {
+        setAnnonces(Array.isArray(annoncesData) ? annoncesData : []);
+        setUsers(Array.isArray(usersData) ? usersData : []);
+      })
+      .catch(() => setError('Impossible de charger les annonces.'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filteredAnnonces = annonces
+    .map((a) => mapAnnonce(a, users))
+    .filter((annonce) => {
+      const matchSearch = annonce.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        annonce.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchType = !typeFilter || annonce.type === typeFilter;
+      return matchSearch && matchType;
+    });
+
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+
+  if (error) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p className="text-red-500">{error}</p>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
@@ -67,10 +105,8 @@ export function AnnoncesPage() {
               Filtres
             </Button>
           </div>
-
-          {/* Filtres avancés */}
           {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-[var(--color-border)]">
+            <div className="pt-4 border-t border-[var(--color-border)]">
               <Select
                 label="Type d'annonce"
                 placeholder="Tous les types"
@@ -81,20 +117,7 @@ export function AnnoncesPage() {
                   { value: 'Don', label: 'Don' },
                   { value: 'Prêt', label: 'Prêt' },
                   { value: 'Service', label: 'Service' },
-                  { value: 'Atelier', label: 'Atelier' }
-                ]}
-              />
-              <Select
-                label="Zone"
-                placeholder="Toutes les zones"
-                value={zoneFilter}
-                onChange={(e) => setZoneFilter(e.target.value)}
-                options={[
-                  { value: '', label: 'Toutes les zones' },
-                  { value: 'Centre-ville', label: 'Centre-ville' },
-                  { value: 'Quartier Nord', label: 'Quartier Nord' },
-                  { value: 'Quartier Sud', label: 'Quartier Sud' },
-                  { value: 'Toute la commune', label: 'Toute la commune' }
+                  { value: 'Atelier', label: 'Atelier' },
                 ]}
               />
             </div>
@@ -105,7 +128,7 @@ export function AnnoncesPage() {
         {filteredAnnonces.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-[var(--color-text-secondary)] text-lg">
-              Aucune annonce ne correspond à vos critères de recherche.
+              Aucune annonce ne correspond à votre recherche.
             </p>
           </div>
         ) : (

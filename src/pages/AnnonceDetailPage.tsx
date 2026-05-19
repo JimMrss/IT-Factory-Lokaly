@@ -3,40 +3,51 @@
 // useParams récupère l'ID depuis l'URL (ex: /annonces/3 → id = "3")
 // On cherche ensuite l'annonce correspondante dans mockData
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { Card } from '../components/Card';
 import { MapPin, Calendar, Heart, ArrowLeft, MessageCircle } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { mockAnnonces } from '../data/mockData';
+import { B_Annonces } from '../Composables/BRIDGE_annonces';
+import { B_users } from '../Composables/BRIDGE_users';
 
-// Plus de props — on utilise useParams pour lire l'ID depuis l'URL
 export function AnnonceDetailPage() {
-  // useParams lit les paramètres dynamiques de l'URL
-  // Pour l'URL /annonces/3, id vaut "3" (c'est une string)
   const { id } = useParams();
-
-  // useNavigate pour le bouton "retour"
   const navigate = useNavigate();
 
-  const [interested, setInterested] = React.useState(false);
+  const [annonce, setAnnonce] = useState<any>(null);
+  const [auteur, setAuteur] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [interested, setInterested] = useState(false);
 
-  // On cherche l'annonce dans mockData avec cet ID
-  // id est une string et annonce.id aussi, donc pas besoin de convertir
-  const annonce = mockAnnonces.find(a => a.id === id);
+  useEffect(() => {
+    if (!id) return;
+    B_Annonces().getAnnonces(id)
+      .then((data) => {
+        setAnnonce(data);
+        if (data?.provider) {
+          B_users().getUser(data.provider).then(setAuteur).catch(() => {});
+        }
+      })
+      .catch(() => setError('Annonce introuvable.'))
+      .finally(() => setLoading(false));
+  }, [id]);
 
-  // Si l'annonce n'existe pas (ID invalide dans l'URL), on affiche un message
-  if (!annonce) {
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+
+  if (error || !annonce) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl text-gray-500">Annonce introuvable</p>
-          <button
-            onClick={() => navigate('/annonces')}
-            className="mt-4 text-[var(--color-primary)] hover:underline"
-          >
+          <button onClick={() => navigate('/annonces')} className="mt-4 text-[var(--color-primary)] hover:underline">
             Retour aux annonces
           </button>
         </div>
@@ -80,20 +91,24 @@ export function AnnonceDetailPage() {
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-4">
                   <h1 className="flex-1">{annonce.name}</h1>
-                  <Badge variant="accent">{annonce.type}</Badge>
+                  {annonce.type && <Badge variant="accent">{annonce.type}</Badge>}
                 </div>
               </div>
 
               {/* Informations */}
               <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
-                  <MapPin size={20} />
-                  <span>{annonce.location}</span>
-                </div>
-                <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
-                  <Calendar size={20} />
-                  <span>{annonce.disponibilite}</span>
-                </div>
+                {annonce.location && (
+                  <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
+                    <MapPin size={20} />
+                    <span>{annonce.location}</span>
+                  </div>
+                )}
+                {(annonce.disponibilite || annonce.date) && (
+                  <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
+                    <Calendar size={20} />
+                    <span>{annonce.disponibilite || `${annonce.date}${annonce.hour ? ` à ${annonce.hour}` : ''}`}</span>
+                  </div>
+                )}
               </div>
 
               {/* Description */}
@@ -110,11 +125,13 @@ export function AnnonceDetailPage() {
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full flex items-center justify-center">
                     <span className="text-white text-lg">
-                      {annonce.auteur.nom.charAt(0)}
+                      {auteur ? auteur.name.charAt(0).toUpperCase() : 'M'}
                     </span>
                   </div>
                   <div>
-                    <p className="font-medium">{annonce.auteur.nom}</p>
+                    <p className="font-medium">
+                      {auteur ? `${auteur.name} ${auteur.surname}` : 'Membre de la communauté'}
+                    </p>
                     <p className="text-sm text-[var(--color-text-secondary)]">Membre de la communauté</p>
                   </div>
                 </div>
