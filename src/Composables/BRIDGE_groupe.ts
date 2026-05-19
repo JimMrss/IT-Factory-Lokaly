@@ -17,6 +17,8 @@ export interface Group {
   group_id: number;
   name: string;
   description: string;
+  category: string;
+  niveau: string;
   members: number[];
   annonces: number[];
 }
@@ -27,13 +29,17 @@ export interface GroupPayload {
   description?: string;
   members?: number[];
   annonces?: number[];
+  category?: string;
+  niveau?: string;
 }
 
 const autorizedFields: (keyof GroupPayload)[] = [
   "name",
   "description",
   "members",
-  "annonces"
+  "annonces",
+  "category",
+  "niveau"
 ];
 
 const filterGroupPayload = (payload: GroupPayload): Partial<GroupPayload> => {

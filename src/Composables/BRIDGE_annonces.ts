@@ -13,6 +13,8 @@ export function B_Annonces() {
 // champs autorisé pour les annonces
 export interface AnnoncePayload {
   name?: string;
+  type?: string;
+  disponibilite?: string;
   interested_users?: number[];
   date?: string;
   hour?: string;
@@ -23,7 +25,7 @@ export interface AnnoncePayload {
 }
 
 const autorizedFields: (keyof AnnoncePayload)[] = [
-  'name','interested_users','date','hour','description','location','provider','state'
+  'name','type','disponibilite','interested_users','date','hour','description','location','provider','state'
 ];
 
 // Fonction pour créer une nouvelle annonce (à modifier)

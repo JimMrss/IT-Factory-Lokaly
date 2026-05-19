@@ -15,6 +15,8 @@ export const Group = () => {
         group_id: Number,
         name: String,
         description: String,
+        category: String,
+        niveau: String,
         members: [] as number[],
         annonces: [] as number[]
     }
@@ -23,6 +25,8 @@ export const Annonce = () => {
     return {
         annonce_id: Number,
         name: String,
+        type: String,
+        disponibilite: String,
         interested_users: [] as number[],
         date: String,
         hour: String,
