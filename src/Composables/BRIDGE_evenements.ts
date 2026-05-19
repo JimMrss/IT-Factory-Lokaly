@@ -3,6 +3,7 @@ import { api } from "./apiConnect";
 export function B_Evenements() {
     return {
         getEvenements,
+        getAllEvenements,
         createEvenement,
         updateEvenement,
         deleteEvenement
@@ -35,6 +36,10 @@ const createEvenement = async (payload: EvenementPayload): Promise<any> => {
 // Fonction pour récupérer les informations d'un événement par son ID
 const getEvenements = async (id: number | string): Promise<any> => {
     const res = await api.get(`/evenements/${id}`);
+    return res.data;
+}
+const getAllEvenements = async (): Promise<any> => {
+    const res = await api.get('/evenements/');
     return res.data;
 }
 // Fonction pour mettre à jour les informations d'un événement

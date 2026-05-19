@@ -7,7 +7,8 @@ export function B_groupes() {
     updateGroup,
     deleteGroup,
     addMemberToGroup,
-    removeMemberFromGroup
+    removeMemberFromGroup,
+    getAllGroups
   };
 }
 
@@ -58,6 +59,10 @@ const getGroup = async (id: number | string): Promise<Group> => {
   const res = await api.get(`/groupes/${id}`);
   return res.data;
 };
+const getAllGroups = async (): Promise<Group[]> => {
+  const res = await api.get('/groupes/');
+  return res.data;
+}
 
 // Fonction pour mettre à jour les informations d'un groupe
 const updateGroup = async (id: number | string, payload: GroupPayload): Promise<Group> => {

@@ -5,7 +5,8 @@ export function B_users() {
     getUser,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    getAllUsers
   }
 }
 export interface UserPayload {
@@ -37,6 +38,10 @@ const getUser = async (id: number | string): Promise<any> => {
   const res = await api.get(`/clients/${id}`);
   return res.data;
 };
+const getAllUsers = async (): Promise<any> => {
+  const res = await api.get('/clients/');
+  return res.data;
+}
 // Fonction pour mettre à jour les informations d'un utilisateur (à modifier)
 const updateUser = async (id: number | string,payload: UserPayload): Promise<any> => {
   const filteredPayload = filterPayload(payload);
