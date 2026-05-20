@@ -1,15 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { AnnonceCard } from '../components/AnnonceCard';
 import { GroupeCard } from '../components/GroupeCard';
 import { Plus, ArrowRight } from 'lucide-react';
-import { mockAnnonces, mockGroupes, mockStats } from '../data/mockData';
+import { B_Annonces } from '../Composables/BRIDGE_annonces';
+import { B_groupes } from '../Composables/BRIDGE_groupe';
+import { B_users } from '../Composables/BRIDGE_users';
 import { toast } from 'sonner';
 
 export function HomePage() {
-  // useNavigate retourne une fonction navigate() pour changer de page
   const navigate = useNavigate();
+  const [annonces, setAnnonces] = useState<any[]>([]);
+  const [groupes, setGroupes] = useState<any[]>([]);
+  const [stats, setStats] = useState({ habitants: 0, annonces: 0, groupes: 0 });
+
+  useEffect(() => {
+    Promise.all([
+      B_Annonces().getAllAnnonces(),
+      B_groupes().getAllGroups(),
+      B_users().getAllUsers(),
+    ]).then(([rawAnnonces, rawGroupes, rawUsers]) => {
+      const annoncesFormatees = rawAnnonces.slice(0, 4).map((a: any) => ({
+        id: String(a.annonce_id),
+        name: a.name,
+        description: a.description,
+        location: a.location,
+        disponibilite: a.disponibilite || a.date || '',
+        type: a.type || '',
+        auteur: { nom: 'Membre de la communauté' },
+      }));
+
+      const groupesFormates = rawGroupes.slice(0, 3).map((g: any) => ({
+        id: String(g.group_id),
+        name: g.name,
+        description: g.description,
+        categorie: g.category || '',
+        niveau: parseInt(g.niveau) || 1,
+        members: g.members ? g.members.length : 0,
+      }));
+
+      setAnnonces(annoncesFormatees);
+      setGroupes(groupesFormates);
+      setStats({
+        habitants: rawUsers.length,
+        annonces: rawAnnonces.length,
+        groupes: rawGroupes.length,
+      });
+    }).catch(err => {
+      console.log('erreur chargement home:', err);
+    });
+  }, []);
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
       {/* Hero Section */}
@@ -42,15 +83,15 @@ export function HomePage() {
             {/* Stats */}
             <div className="flex gap-8 mt-8 pt-6 border-t border-white/20 justify-center">
               <div>
-                <p className="text-2xl font-bold text-white">{mockStats.habitants}</p>
+                <p className="text-2xl font-bold text-white">{stats.habitants}</p>
                 <p className="text-white text-sm opacity-70">Habitants</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-white">{mockStats.annonces}</p>
+                <p className="text-2xl font-bold text-white">{stats.annonces}</p>
                 <p className="text-white text-sm opacity-70">Annonces</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-white">{mockStats.groupes}</p>
+                <p className="text-2xl font-bold text-white">{stats.groupes}</p>
                 <p className="text-white text-sm opacity-70">Groupes</p>
               </div>
             </div>
@@ -79,7 +120,7 @@ export function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {mockAnnonces.slice(0, 4).map((annonce) => (
+            {annonces.map((annonce) => (
               <AnnonceCard
                 key={annonce.id}
                 annonce={annonce}
@@ -122,7 +163,7 @@ export function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockGroupes.slice(0, 3).map((groupe) => (
+            {groupes.map((groupe) => (
               <GroupeCard
                 key={groupe.id}
                 groupe={groupe}
