@@ -66,29 +66,6 @@ export function GroupesPage() {
     });
   }
 
-  const [groupes, setGroupes] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    B_groupes().getAllGroups()
-      .then((data) => setGroupes(Array.isArray(data) ? data : []))
-      .catch(() => setError('Impossible de charger les groupes.'))
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
-
-  if (error) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <p className="text-red-500">{error}</p>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -8,7 +8,6 @@ import { Select } from '../components/Select';
 import { Card } from '../components/Card';
 import { ArrowLeft, Sparkles, Eye, Send, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { B_Annonces } from '../Composables/BRIDGE_annonces';
 
 export function NouvelleAnnoncePage() {
   const navigate = useNavigate();
@@ -56,18 +55,7 @@ export function NouvelleAnnoncePage() {
 
     setIsSubmitting(true);
 
-    let res = null;
     try {
-      res = await B_Annonces().createAnnonce({
-        name,
-        description,
-        location: zone,
-        type,
-        disponibilite,
-        state: 'disponible',
-      });
-      console.log('annonce créée:', res);
-      try {
       await B_Annonces().createAnnonce({
         name,
         description,
@@ -77,14 +65,11 @@ export function NouvelleAnnoncePage() {
         state: 'disponible',
       });
       toast.success('Annonce publiée avec succès !');
-        navigate('/annonces');
+      navigate('/annonces');
     } catch (err) {
       console.log('erreur création annonce:', err);
       toast.error('Erreur lors de la publication. Réessayez.');
       setIsSubmitting(false);
-    }
-    } catch {
-      toast.error('Erreur lors de la publication. Réessayez.');
     }
   };
 

@@ -1,3 +1,4 @@
+import { Mail } from "lucide-react"
 
 export const Client = () => {
     return {
