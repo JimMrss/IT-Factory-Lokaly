@@ -62,6 +62,9 @@ export function NouvelleAnnoncePage() {
         location: zone,
         type,
         disponibilite,
+        provider: 1, // à remplacer par l'ID de l'utilisateur connecté
+        date: new Date().toISOString().split('T')[0], // date du jour
+        hour: new Date().toISOString().split('T')[1].slice(0, 5), // heure actuelle
         state: 'disponible',
       });
       toast.success('Annonce publiée avec succès !');

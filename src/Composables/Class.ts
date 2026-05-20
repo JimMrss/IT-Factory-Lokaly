@@ -47,6 +47,7 @@ export const Evenement = () => {
 }
 export const UserProfile = () => {
     return {
+        user_id: Number,
         nom: String,
         login: String,
         password: String,
