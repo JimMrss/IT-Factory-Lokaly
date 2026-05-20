@@ -85,6 +85,7 @@ const deleteGroup = async (id: number | string): Promise<any> => {
 
 // fonction pour ajouter un membre à un groupe
 const addMemberToGroup = async (groupId: number | string,userId: number | string): Promise<Group> => {
+  console.log('Adding user', userId, 'to group', groupId);
   const res = await api.post(`/groupes/${groupId}/add_member/`, { user_id: userId });
   return res.data;
 };

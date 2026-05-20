@@ -8,6 +8,7 @@ import { Select } from '../components/Select';
 import { Card } from '../components/Card';
 import { ArrowLeft, Users, Send } from 'lucide-react';
 import { toast } from 'sonner';
+import { B_auth } from '@/Composables/BRIDGE_auth';
 
 export function CreerGroupePage() {
   const navigate = useNavigate();
@@ -32,9 +33,12 @@ export function CreerGroupePage() {
         name,
         description,
         category: categorie,
+        niveau: "1",
       } as any);
       console.log('groupe créé:', res);
       toast.success('Groupe créé avec succès ! Il commencera au Niveau 1.');
+      const currentUser = await B_auth().getCurrentUser();
+      res = await B_groupes().addMemberToGroup(res.group_id, currentUser.user_id!);
       navigate('/groupes');
     } catch (err) {
       console.log('erreur création groupe:', err);

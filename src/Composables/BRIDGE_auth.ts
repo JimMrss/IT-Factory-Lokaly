@@ -2,6 +2,7 @@ import { api } from './apiConnect'
 
 const authorizedFields: (keyof AuthPayload)[] = ['name','surname','mail','password'];
 export interface AuthPayload {
+    user_id?: number;
     name?: string;
     surname?: string;
     mail?: string;
@@ -34,7 +35,7 @@ export function B_auth() {
         const res = await api.post('/auth/logout/');
         return res.data;
     }
-    const getCurrentUser = async (): Promise<any> => {
+    const getCurrentUser = async (): Promise<AuthPayload> => {
         const res = await api.get('/auth/user/');
         return res.data;
     }
