@@ -59,10 +59,7 @@ export function AnnonceDetailPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl text-gray-500">Annonce introuvable</p>
-          <button
-            onClick={() => navigate('/annonces')}
-            className="mt-4 text-[var(--color-primary)] hover:underline"
-          >
+          <button onClick={() => navigate('/annonces')} className="mt-4 text-[var(--color-primary)] hover:underline">
             Retour aux annonces
           </button>
         </div>
@@ -111,18 +108,14 @@ export function AnnonceDetailPage() {
               </div>
 
               <div className="flex flex-wrap gap-4">
-                {annonce.location && (
-                  <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
-                    <MapPin size={20} />
-                    <span>{annonce.location}</span>
-                  </div>
-                )}
-                {(annonce.disponibilite || annonce.date) && (
-                  <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
-                    <Calendar size={20} />
-                    <span>{annonce.disponibilite || annonce.date}</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
+                  <MapPin size={20} />
+                  <span>{annonce.location}</span>
+                </div>
+                <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
+                  <Calendar size={20} />
+                  <span>{annonce.disponibilite}</span>
+                </div>
               </div>
 
               <div className="space-y-2">

@@ -1,4 +1,3 @@
-
 export const Client = () => {
     return {
         user_id: Number,
@@ -44,5 +43,16 @@ export const Evenement = () => {
         description: String,
         location: String,
         provider: Number
+    }
+}
+export const UserProfile = () => {
+    return {
+        user_id: Number,
+        nom: String,
+        login: String,
+        password: String,
+        bio: String,
+        centresInteret: [] as string[],
+        competences: [] as string[]
     }
 }

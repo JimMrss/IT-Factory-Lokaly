@@ -37,7 +37,7 @@ export interface User {
 
 export interface UserProfile {
   nom: string; // Nom complet affiché (ex: "Marie Dubois")
-  identifier: string;
+  identifier: string; // Identifiant unique (ex: "marie.dubois")
   bio: string;
   centresInteret: string[];
   competences: string[];

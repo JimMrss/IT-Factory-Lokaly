@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Users, Heart, MessageCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { B_auth } from '../Composables/BRIDGE_auth';
 
 // Plus besoin de props — on utilise le contexte et le router directement
 export function LoginPage() {
@@ -34,15 +35,11 @@ export function LoginPage() {
     setError('');
     setIsLoading(true);
 
-    // Simulation d'un délai réseau (sera remplacé par un vrai appel API)
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    if (loginUsername === 'test' && loginPassword === 'test') {
-      // On utilise login() du contexte au lieu de onLogin prop
-      login({ username: loginUsername });
-      // Après connexion, on redirige vers la page d'accueil
+    try {
+      const user = await B_auth().login({ name: loginUsername, password: loginPassword });
+      login({ name: user.username ?? user.identifier, email: user.mail ?? user.email, password: loginPassword });
       navigate('/');
-    } else {
+    } catch {
       setError('Identifiants incorrects');
       setIsLoading(false);
     }
@@ -68,11 +65,15 @@ export function LoginPage() {
     }
 
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 800));
 
-    const user = { username: registerUsername, email: registerEmail };
-    login(user);
-    navigate('/');
+    try {
+      const user = await B_auth().register({ name: registerUsername, mail: registerEmail, password: registerPassword });
+      login({ name: user.username ?? user.identifier, email: user.mail ?? user.email, password: registerPassword });
+      navigate('/');
+    } catch {
+      setError("Erreur lors de l'inscription. Réessayez.");
+      setIsLoading(false);
+    }
   };
 
   return (

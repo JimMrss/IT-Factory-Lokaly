@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { B_groupes } from '../Composables/BRIDGE_groupe';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
@@ -7,7 +8,6 @@ import { Select } from '../components/Select';
 import { Card } from '../components/Card';
 import { ArrowLeft, Users, Send } from 'lucide-react';
 import { toast } from 'sonner';
-import { B_groupes } from '../Composables/BRIDGE_groupe';
 
 export function CreerGroupePage() {
   const navigate = useNavigate();

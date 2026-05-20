@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { B_Annonces } from '../Composables/BRIDGE_annonces';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
@@ -7,7 +8,6 @@ import { Select } from '../components/Select';
 import { Card } from '../components/Card';
 import { ArrowLeft, Sparkles, Eye, Send, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { B_Annonces } from '../Composables/BRIDGE_annonces';
 
 export function NouvelleAnnoncePage() {
   const navigate = useNavigate();
@@ -55,17 +55,18 @@ export function NouvelleAnnoncePage() {
 
     setIsSubmitting(true);
 
-    let res = null;
     try {
-      res = await B_Annonces().createAnnonce({
+      await B_Annonces().createAnnonce({
         name,
         description,
         location: zone,
         type,
         disponibilite,
+        provider: 1, // à remplacer par l'ID de l'utilisateur connecté
+        date: new Date().toISOString().split('T')[0], // date du jour
+        hour: new Date().toISOString().split('T')[1].slice(0, 5), // heure actuelle
         state: 'disponible',
       });
-      console.log('annonce créée:', res);
       toast.success('Annonce publiée avec succès !');
       navigate('/annonces');
     } catch (err) {
