@@ -31,6 +31,7 @@ export const Annonce = () => {
         hour: String,
         description: String,
         location: String,
+        provider: Number,
         state: String
     }
 }
@@ -42,7 +43,8 @@ export const Evenement = () => {
         hour: String,
         description: String,
         location: String,
-        provider: Number
+        provider: Number,
+        group_id: Number
     }
 }
 export const UserProfile = () => {
