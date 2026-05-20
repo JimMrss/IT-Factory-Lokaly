@@ -10,7 +10,7 @@ export function B_Evenements() {
     }
 }
 const authorizedFields: (keyof EvenementPayload)[] = [
-    'name','date','hour','description','location','provider'
+    'name','date','hour','description','location','provider','group_id'
 ];
 export interface EvenementPayload {
     name?: string;
@@ -19,6 +19,7 @@ export interface EvenementPayload {
     description?: string;
     location?: string;
     provider?: number;
+    group_id?: number;
 }
 // Fonction pour créer un nouvel événement (à modifier)
 const createEvenement = async (payload: EvenementPayload): Promise<any> => {

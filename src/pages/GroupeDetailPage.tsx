@@ -4,10 +4,11 @@ import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { Card } from '../components/Card';
 import { AnnonceCard } from '../components/AnnonceCard';
-import { ArrowLeft, Users, UserPlus, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Users, UserPlus, Calendar, MapPin } from 'lucide-react';
 import { B_groupes } from '../Composables/BRIDGE_groupe';
 import { B_Annonces } from '../Composables/BRIDGE_annonces';
 import { B_users } from '../Composables/BRIDGE_users';
+import { B_Evenements } from '../Composables/BRIDGE_evenements';
 import { toast } from 'sonner';
 
 export function GroupeDetailPage() {
@@ -16,6 +17,7 @@ export function GroupeDetailPage() {
 
   const [groupe, setGroupe] = useState<any>(null);
   const [annonces, setAnnonces] = useState<any[]>([]);
+  const [evenements, setEvenements] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMember, setIsMember] = useState(false);
@@ -62,6 +64,17 @@ export function GroupeDetailPage() {
       setUsers(allUsers || []);
     } catch (err) {
       console.log('erreur users:', err);
+    }
+
+    // 4. on charge les événements du groupe
+    try {
+      const tousEvenements = await B_Evenements().getAllEvenements();
+      const evtGroupe = tousEvenements.filter(
+        (e: any) => Number(e.group_id) === Number(g.group_id)
+      );
+      setEvenements(evtGroupe);
+    } catch (err) {
+      console.log('erreur événements:', err);
     }
 
     setLoading(false);
@@ -178,32 +191,46 @@ export function GroupeDetailPage() {
         )}
 
         <section>
-          <h2 className="mb-6">Activité récente</h2>
-          <div className="space-y-4">
+          <h2 className="mb-6">Événements du groupe</h2>
+          {evenements.length === 0 ? (
             <Card>
-              <div className="p-5 flex items-start gap-4">
-                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <TrendingUp size={20} className="text-green-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">3 nouveaux membres ce mois</p>
-                  <p className="text-sm text-[var(--color-text-secondary)] mt-1">Le groupe continue de grandir !</p>
-                </div>
+              <div className="p-6 text-center text-[var(--color-text-secondary)]">
+                Aucun événement pour ce groupe.
               </div>
             </Card>
-
-            <Card>
-              <div className="p-5 flex items-start gap-4">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Users size={20} className="text-blue-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">2 ateliers organisés récemment</p>
-                  <p className="text-sm text-[var(--color-text-secondary)] mt-1">Merci à tous les participants !</p>
-                </div>
-              </div>
-            </Card>
-          </div>
+          ) : (
+            <div className="space-y-4">
+              {evenements.map((evt) => (
+                <Card key={evt.evenement_id}>
+                  <div className="p-5 flex items-start gap-4">
+                    <div className="w-10 h-10 bg-[var(--color-primary)]/10 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Calendar size={20} className="text-[var(--color-primary)]" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">{evt.name}</p>
+                      {evt.description && (
+                        <p className="text-sm text-[var(--color-text-secondary)] mt-1">{evt.description}</p>
+                      )}
+                      <div className="flex flex-wrap gap-4 mt-2 text-sm text-[var(--color-text-secondary)]">
+                        {(evt.date || evt.hour) && (
+                          <span className="flex items-center gap-1">
+                            <Calendar size={14} />
+                            {evt.date}{evt.date && evt.hour ? ' à ' : ''}{evt.hour}
+                          </span>
+                        )}
+                        {evt.location && (
+                          <span className="flex items-center gap-1">
+                            <MapPin size={14} />
+                            {evt.location}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </div>
