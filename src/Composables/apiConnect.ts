@@ -6,6 +6,7 @@ export const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
   headers: {
-    "Content-Type": "application/json"
-  }
+    "Content-Type": "application/json",
+    // supprimer "Access-Control-Allow-Origin"
+  },
 });
