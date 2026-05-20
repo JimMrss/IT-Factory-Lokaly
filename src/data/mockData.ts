@@ -61,6 +61,7 @@ export const mockAnnonces: Annonce[] = [
 export const mockGroupes: Groupe[] = [
   {
     id: '1',
+    idAdmin: '4',
     name: 'Jardiniers du quartier',
     description: 'Échange de graines, conseils de jardinage et organisation de trocs de plants.',
     niveau: 3,
@@ -70,6 +71,7 @@ export const mockGroupes: Groupe[] = [
   },
   {
     id: '2',
+    idAdmin: '4',
     name: 'Couture & DIY',
     description: 'Apprenez la couture, le tricot et plein d\'autres activités créatives ensemble.',
     niveau: 2,
@@ -79,6 +81,7 @@ export const mockGroupes: Groupe[] = [
   },
   {
     id: '3',
+    idAdmin: '4',
     name: 'Bibliothèque partagée',
     description: 'Échangez vos livres, BD et magazines avec les autres habitants.',
     niveau: 5,
@@ -88,6 +91,7 @@ export const mockGroupes: Groupe[] = [
   },
   {
     id: '4',
+    idAdmin: '1',
     name: 'Sport ensemble',
     description: 'Organisation de sorties vélo, jogging et autres activités sportives collectives.',
     niveau: 2,
@@ -97,6 +101,7 @@ export const mockGroupes: Groupe[] = [
   },
   {
     id: '5',
+    idAdmin: '1',
     name: 'Repair Café',
     description: 'Réparons ensemble nos objets du quotidien plutôt que de les jeter.',
     niveau: 1,

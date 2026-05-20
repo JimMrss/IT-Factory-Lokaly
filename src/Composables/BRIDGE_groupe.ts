@@ -31,6 +31,7 @@ export interface GroupPayload {
   annonces?: number[];
   category?: string;
   niveau?: string;
+  idAdmin?: number;
 }
 
 const autorizedFields: (keyof GroupPayload)[] = [
@@ -39,7 +40,8 @@ const autorizedFields: (keyof GroupPayload)[] = [
   "members",
   "annonces",
   "category",
-  "niveau"
+  "niveau",
+  "idAdmin"
 ];
 
 const filterGroupPayload = (payload: GroupPayload): Partial<GroupPayload> => {

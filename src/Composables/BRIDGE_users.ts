@@ -1,55 +1,42 @@
 import { api } from "./apiConnect";
 
 export function B_users() {
-  return {
-    getUser,
-    createUser,
-    updateUser,
-    deleteUser,
-    getAllUsers
-  }
+  return { getUser, getAllUsers, updateUser };
 }
+
 export interface UserPayload {
-  identifier?: string;
-  name?: string;
-  surname?: string;
-  description?: string;
-  groups?: string[];
-  activities?: string[];
+  bio?: string;
+  centresInteret?: string[];
+  competences?: string[];
+  objetsDisponibles?: string[];
+  contactExterne?: string;
 }
+
+const authorizedFields: (keyof UserPayload)[] = [
+  "bio", "centresInteret", "competences", "objetsDisponibles", "contactExterne"
+];
+
 function filterPayload(payload: Record<string, any>): Partial<UserPayload> {
   const filtered: Partial<UserPayload> = {};
   for (const key in payload) {
-    if (authorizedFields.includes(key as keyof UserPayload)) {filtered[key as keyof UserPayload] = payload[key];}
+    if (authorizedFields.includes(key as keyof UserPayload)) {
+      filtered[key as keyof UserPayload] = payload[key];
+    }
   }
   return filtered;
 }
-// champs autorisé pour les utilisateurs : name, email, password, phone, address
-const authorizedFields: (keyof UserPayload)[] = ["identifier","name","surname","description","groups","activities"];
 
-// Fonction pour créer un nouvel utilisateur (à modifier)
-const createUser = async (payload: UserPayload): Promise<any> => {
-  const filteredPayload = filterPayload(payload);
-  const res = await api.post("/clients/", filteredPayload);
-  return res.data;
-};
-// Fonction pour récupérer les informations d'un utilisateur par son ID
 const getUser = async (id: number | string): Promise<any> => {
-  const res = await api.get(`/clients/${id}`);
+  const res = await api.get(`/users/${id}`);
   return res.data;
 };
+
 const getAllUsers = async (): Promise<any> => {
-  const res = await api.get('/clients/');
-  return res.data;
-}
-// Fonction pour mettre à jour les informations d'un utilisateur (à modifier)
-const updateUser = async (id: number | string,payload: UserPayload): Promise<any> => {
-  const filteredPayload = filterPayload(payload);
-  const res = await api.patch(`/clients/${id}`, filteredPayload);
+  const res = await api.get('/users/');
   return res.data;
 };
-// Fonction pour supprimer un utilisateur
-const deleteUser = async (id: number | string): Promise<any> => {
-  const res = await api.delete(`/clients/${id}`);
+
+const updateUser = async (id: number | string, payload: UserPayload): Promise<any> => {
+  const res = await api.patch(`/users/${id}`, filterPayload(payload));
   return res.data;
-}
+};

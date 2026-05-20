@@ -4,16 +4,18 @@ import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { Card } from '../components/Card';
 import { AnnonceCard } from '../components/AnnonceCard';
-import { ArrowLeft, Users, UserPlus, Calendar, MapPin } from 'lucide-react';
+import { ArrowLeft, Users, UserPlus, Calendar, MapPin, Plus } from 'lucide-react';
 import { B_groupes } from '../Composables/BRIDGE_groupe';
 import { B_Annonces } from '../Composables/BRIDGE_annonces';
 import { B_users } from '../Composables/BRIDGE_users';
 import { B_Evenements } from '../Composables/BRIDGE_evenements';
 import { toast } from 'sonner';
+import { useAuth } from '../context/AuthContext';
 
 export function GroupeDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [groupe, setGroupe] = useState<any>(null);
   const [annonces, setAnnonces] = useState<any[]>([]);
@@ -21,6 +23,13 @@ export function GroupeDetailPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMember, setIsMember] = useState(false);
+  const [showEvtForm, setShowEvtForm] = useState(false);
+  const [evtName, setEvtName] = useState('');
+  const [evtDate, setEvtDate] = useState('');
+  const [evtHour, setEvtHour] = useState('');
+  const [evtDescription, setEvtDescription] = useState('');
+  const [evtLocation, setEvtLocation] = useState('');
+  const [evtLoading, setEvtLoading] = useState(false);
 
   useEffect(() => {
     if (id) chargerGroupe();
@@ -31,8 +40,8 @@ export function GroupeDetailPage() {
     let g = null;
     try {
       g = await B_groupes().getGroup(id!);
-      console.log('groupe chargé:', g);
       setGroupe(g);
+      setIsMember(Array.isArray(g.members) && user?.user_id != null && g.members.includes(user.user_id));
     } catch (err) {
       console.log('erreur groupe:', err);
       setLoading(false);
@@ -81,17 +90,45 @@ export function GroupeDetailPage() {
   };
 
   const handleJoinLeave = async () => {
+    if (!user?.user_id) return;
     try {
+      let updated;
       if (isMember) {
-        await B_groupes().removeMemberFromGroup(groupe.group_id, 1); // TODO: remplacer 1 par vrai user id
+        updated = await B_groupes().removeMemberFromGroup(groupe.group_id, user.user_id);
         toast.success('Vous avez quitté le groupe.');
       } else {
-        await B_groupes().addMemberToGroup(groupe.group_id, 1); // TODO: remplacer 1 par vrai user id
+        updated = await B_groupes().addMemberToGroup(groupe.group_id, user.user_id);
         toast.success('Vous avez rejoint le groupe !');
       }
+      setGroupe(updated);
       setIsMember(!isMember);
     } catch {
       toast.error('Une erreur est survenue.');
+    }
+  };
+
+  const handleCreateEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user?.user_id) return;
+    setEvtLoading(true);
+    try {
+      const created = await B_Evenements().createEvenement({
+        name: evtName,
+        date: evtDate,
+        hour: evtHour,
+        description: evtDescription,
+        location: evtLocation,
+        provider: user.user_id,
+        group_id: groupe.group_id,
+      });
+      setEvenements(prev => [...prev, created]);
+      setEvtName(''); setEvtDate(''); setEvtHour(''); setEvtDescription(''); setEvtLocation('');
+      setShowEvtForm(false);
+      toast.success('Événement créé !');
+    } catch {
+      toast.error('Erreur lors de la création.');
+    } finally {
+      setEvtLoading(false);
     }
   };
 
@@ -191,7 +228,33 @@ export function GroupeDetailPage() {
         )}
 
         <section>
-          <h2 className="mb-6">Événements du groupe</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2>Événements du groupe</h2>
+            {groupe.idAdmin === user?.user_id && (
+              <Button variant="primary" icon={<Plus size={20} />} onClick={() => setShowEvtForm(v => !v)}>
+                Créer un événement
+              </Button>
+            )}
+          </div>
+
+          {showEvtForm && (
+            <Card className="mb-6">
+              <form onSubmit={handleCreateEvent} className="p-6 space-y-4">
+                <input required placeholder="Nom de l'événement" value={evtName} onChange={e => setEvtName(e.target.value)} className="w-full px-4 py-2 border rounded-lg outline-none focus:border-[var(--color-primary)]" />
+                <div className="grid grid-cols-2 gap-4">
+                  <input required type="date" value={evtDate} onChange={e => setEvtDate(e.target.value)} className="w-full px-4 py-2 border rounded-lg outline-none focus:border-[var(--color-primary)]" />
+                  <input required type="time" value={evtHour} onChange={e => setEvtHour(e.target.value)} className="w-full px-4 py-2 border rounded-lg outline-none focus:border-[var(--color-primary)]" />
+                </div>
+                <input required placeholder="Lieu" value={evtLocation} onChange={e => setEvtLocation(e.target.value)} className="w-full px-4 py-2 border rounded-lg outline-none focus:border-[var(--color-primary)]" />
+                <textarea required placeholder="Description" value={evtDescription} onChange={e => setEvtDescription(e.target.value)} rows={3} className="w-full px-4 py-2 border rounded-lg outline-none focus:border-[var(--color-primary)] resize-none" />
+                <div className="flex gap-3 justify-end">
+                  <Button type="button" variant="outline" onClick={() => setShowEvtForm(false)}>Annuler</Button>
+                  <Button type="submit" variant="primary" disabled={evtLoading}>{evtLoading ? 'Création...' : 'Créer'}</Button>
+                </div>
+              </form>
+            </Card>
+          )}
+
           {evenements.length === 0 ? (
             <Card>
               <div className="p-6 text-center text-[var(--color-text-secondary)]">

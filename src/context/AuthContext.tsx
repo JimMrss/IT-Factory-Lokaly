@@ -6,9 +6,10 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // On définit les types TypeScript pour notre utilisateur
 interface User {
+  user_id?: number;
   name: string;
-  email?: string; // le ? veut dire que c'est optionnel
-  password: string; // on peut aussi stocker le mot de passe
+  email?: string;
+  password: string;
 }
 
 // On définit ce que notre contexte va exposer aux composants

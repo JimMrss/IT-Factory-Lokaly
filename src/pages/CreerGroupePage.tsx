@@ -8,10 +8,11 @@ import { Select } from '../components/Select';
 import { Card } from '../components/Card';
 import { ArrowLeft, Users, Send } from 'lucide-react';
 import { toast } from 'sonner';
-import { B_auth } from '@/Composables/BRIDGE_auth';
+import { useAuth } from '../context/AuthContext';
 
 export function CreerGroupePage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [categorie, setCategorie] = useState('');
@@ -25,6 +26,11 @@ export function CreerGroupePage() {
       return;
     }
 
+    if (!user?.user_id) {
+      toast.error('Session expirée, reconnectez-vous.');
+      return;
+    }
+
     setLoading(true);
 
     let res = null;
@@ -34,11 +40,10 @@ export function CreerGroupePage() {
         description,
         category: categorie,
         niveau: "1",
+        idAdmin: user?.user_id,
       } as any);
-      console.log('groupe créé:', res);
+      await B_groupes().addMemberToGroup(res.group_id, user?.user_id!);
       toast.success('Groupe créé avec succès ! Il commencera au Niveau 1.');
-      const currentUser = await B_auth().getCurrentUser();
-      res = await B_groupes().addMemberToGroup(res.group_id, currentUser.user_id!);
       navigate('/groupes');
     } catch (err) {
       console.log('erreur création groupe:', err);

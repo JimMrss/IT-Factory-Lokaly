@@ -61,6 +61,7 @@ export interface GroupPayload {
   name?: string;
   description?: string;
   members?: number[];
+  idAdmin?: string;
   annonces?: number[];
   // Champs demandés au backend (pas encore implémentés côté back)
   categorie?: string;
@@ -73,6 +74,7 @@ export interface Groupe {
   name: string;
   description: string;
   members: number;
+  idAdmin: string;
   annonces: string[];
   categorie: string;
   niveau: number;
