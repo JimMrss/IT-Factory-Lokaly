@@ -8,9 +8,11 @@ import { Select } from '../components/Select';
 import { Card } from '../components/Card';
 import { ArrowLeft, Sparkles, Eye, Send, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '../context/AuthContext';
 
 export function NouvelleAnnoncePage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [description, setDescription] = useState('');
@@ -44,6 +46,10 @@ export function NouvelleAnnoncePage() {
     e.preventDefault();
 
     // vérification rapide avant d'envoyer
+    if (!user?.user_id) {
+      toast.error('Session expirée, reconnectez-vous.');
+      return;
+    }
     if (!name || !type || !description || !zone || !disponibilite) {
       alert('Veuillez remplir tous les champs obligatoires.');
       return;
@@ -62,7 +68,7 @@ export function NouvelleAnnoncePage() {
         location: zone,
         type,
         disponibilite,
-        provider: 1, // à remplacer par l'ID de l'utilisateur connecté
+        provider: user.user_id,
         date: new Date().toISOString().split('T')[0], // date du jour
         hour: new Date().toISOString().split('T')[1].slice(0, 5), // heure actuelle
         state: 'disponible',

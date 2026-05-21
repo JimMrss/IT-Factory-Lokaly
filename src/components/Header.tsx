@@ -94,7 +94,7 @@ export function Header({ communityName = 'Commune de Tori' }: { communityName?: 
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
                   <div className="w-7 h-7 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-medium">
-                      {user.name.charAt(0).toUpperCase()}
+                      {(user.name ?? '?').charAt(0).toUpperCase()}
                     </span>
                   </div>
                   <span className="text-sm font-medium text-[var(--color-text-primary)]">
@@ -128,7 +128,7 @@ export function Header({ communityName = 'Commune de Tori' }: { communityName?: 
               <div className="flex items-center gap-3 px-4 py-3 mb-2 bg-gray-50 rounded-lg mx-2">
                 <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full flex items-center justify-center">
                   <span className="text-white font-medium">
-                    {user.name.charAt(0).toUpperCase()}
+                    {(user.name ?? '?').charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div>

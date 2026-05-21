@@ -69,7 +69,7 @@ export function AnnonceDetailPage() {
 
   let nomAuteur = 'Membre de la communauté';
   if (auteur != null) {
-    nomAuteur = auteur.name + ' ' + auteur.surname;
+    nomAuteur = auteur.nom;
   }
 
   const handleInterest = () => {

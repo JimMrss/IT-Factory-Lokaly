@@ -67,7 +67,7 @@ export function AnnoncesPage() {
         let nomAuteur = 'Membre de la communauté';
         for (let j = 0; j < users.length; j++) {
           if (users[j].user_id === a.provider) {
-            nomAuteur = users[j].name + ' ' + users[j].surname;
+            nomAuteur = users[j].nom;
             break;
           }
         }

@@ -158,7 +158,7 @@ export function GroupeDetailPage() {
     let nom = 'Membre de la communauté';
     for (let i = 0; i < users.length; i++) {
       if (users[i].user_id === providerId) {
-        nom = users[i].name + ' ' + users[i].surname;
+        nom = users[i].nom;
         break;
       }
     }
