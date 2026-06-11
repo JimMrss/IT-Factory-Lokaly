@@ -8,6 +8,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Home, FileText, Users, User, Menu, X, LogOut } from 'lucide-react';
+import { NotificationBell } from './NotificationBell';
 
 // Plus de props nécessaires — tout vient des hooks
 export function Header({ communityName = 'Commune de Tori' }: { communityName?: string }) {
@@ -101,6 +102,7 @@ export function Header({ communityName = 'Commune de Tori' }: { communityName?: 
                     {user.name}
                   </span>
                 </div>
+                <NotificationBell />
                 <button
                   onClick={handleLogout}
                   className="p-2 text-gray-500 hover:text-[var(--color-danger)] hover:bg-red-50 rounded-lg transition-colors"
@@ -161,16 +163,21 @@ export function Header({ communityName = 'Commune de Tori' }: { communityName?: 
             })}
 
             {user && (
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 mt-2 text-[var(--color-danger)] hover:bg-red-50 transition-all border-t border-[var(--color-border)]"
-              >
-                <LogOut size={20} />
-                <span>Se déconnecter</span>
-              </button>
+              <>
+                <div className="px-4 py-3 border-t border-[var(--color-border)]">
+                  <NotificationBell />
+                </div>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-[var(--color-danger)] hover:bg-red-50 transition-all border-t border-[var(--color-border)]"
+                >
+                  <LogOut size={20} />
+                  <span>Se déconnecter</span>
+                </button>
+              </>
             )}
           </nav>
         )}
