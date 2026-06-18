@@ -4,15 +4,12 @@
 // <Outlet /> est un composant de react-router-dom qui dit "affiche la page ici"
 
 import React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
 export function PublicLayout() {
-  // useNavigate permet de changer de page
-  const navigate = useNavigate();
-
   return (
     <div className="flex flex-col min-h-screen bg-[var(--color-background)]">
       {/* Notifications toast (messages en haut à droite) */}
@@ -28,16 +25,6 @@ export function PublicLayout() {
 
       {/* Footer en bas */}
       <Footer />
-
-      {/* Bouton flottant pour accéder au panel admin */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <button
-          onClick={() => navigate('/admin')}
-          className="bg-[var(--color-danger)] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg hover:bg-[var(--color-danger-hover)] transition-colors"
-        >
-          Admin
-        </button>
-      </div>
     </div>
   );
 }

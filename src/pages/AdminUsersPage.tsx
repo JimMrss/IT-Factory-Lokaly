@@ -3,7 +3,7 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Badge } from '../components/Badge';
-import { UserPlus, Search, Eye, EyeOff, Key } from 'lucide-react';
+import { UserPlus, Search, Eye, EyeOff, Key, Shield, ShieldOff } from 'lucide-react';
 import { B_users } from '../Composables/BRIDGE_users';
 import { B_auth } from '../Composables/BRIDGE_auth';
 import { B_admin_users } from '../Composables/Admin';
@@ -75,6 +75,24 @@ export function AdminUsersPage() {
     }
   };
 
+  const handleToggleAdmin = async (user: any) => {
+    const id = user.user_id ?? user.id;
+    const isAdmin = Number(user.permissions) === 1;
+    const newPermissions: 0 | 1 = isAdmin ? 0 : 1;
+    try {
+      const { setUserPermissions } = B_admin_users();
+      await setUserPermissions(id, newPermissions);
+      setUsers((prev) =>
+        prev.map((u) => ((u.user_id ?? u.id) === id ? { ...u, permissions: newPermissions } : u))
+      );
+      toast.success(
+        `${getNom(user)} ${newPermissions === 1 ? 'est maintenant administrateur' : "n'est plus administrateur"}.`
+      );
+    } catch {
+      toast.error('Erreur lors de la mise à jour du rôle.');
+    }
+  };
+
   const handleResetPassword = async (user: any) => {
     const newPassword = window.prompt(`Nouveau mot de passe pour ${getNom(user)} :`);
     if (!newPassword) return;
@@ -132,6 +150,7 @@ export function AdminUsersPage() {
                 <tr className="border-b border-[var(--color-border)]">
                   <th className="text-left p-4 font-medium text-[var(--color-text-secondary)]">Utilisateur</th>
                   <th className="text-left p-4 font-medium text-[var(--color-text-secondary)]">Identifiant</th>
+                  <th className="text-left p-4 font-medium text-[var(--color-text-secondary)]">Rôle</th>
                   <th className="text-left p-4 font-medium text-[var(--color-text-secondary)]">Statut</th>
                   <th className="text-right p-4 font-medium text-[var(--color-text-secondary)]">Actions</th>
                 </tr>
@@ -139,7 +158,7 @@ export function AdminUsersPage() {
               <tbody>
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="text-center py-12 text-[var(--color-text-secondary)]">
+                    <td colSpan={5} className="text-center py-12 text-[var(--color-text-secondary)]">
                       Aucun utilisateur trouvé.
                     </td>
                   </tr>
@@ -160,12 +179,25 @@ export function AdminUsersPage() {
                         <span className="text-[var(--color-text-secondary)]">@{user.identifier ?? '—'}</span>
                       </td>
                       <td className="p-4">
+                        <Badge variant={Number(user.permissions) === 1 ? 'primary' : 'neutral'}>
+                          {Number(user.permissions) === 1 ? 'Admin' : 'Utilisateur'}
+                        </Badge>
+                      </td>
+                      <td className="p-4">
                         <Badge variant={user.statut === 'actif' ? 'secondary' : 'neutral'}>
                           {user.statut === 'actif' ? 'Actif' : user.statut === 'desactive' ? 'Désactivé' : '—'}
                         </Badge>
                       </td>
                       <td className="p-4">
                         <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant={Number(user.permissions) === 1 ? 'outline' : 'primary'}
+                            size="sm"
+                            icon={Number(user.permissions) === 1 ? <ShieldOff size={16} /> : <Shield size={16} />}
+                            onClick={() => handleToggleAdmin(user)}
+                          >
+                            {Number(user.permissions) === 1 ? 'Retirer admin' : 'Rendre admin'}
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"

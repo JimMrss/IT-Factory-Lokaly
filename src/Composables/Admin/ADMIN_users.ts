@@ -24,9 +24,19 @@ const resetUserPassword = async (
   await api.post(`/users/${id}/reset-password/`, { password: newPassword });
 };
 
+// Bascule le rôle admin de l'utilisateur. permissions : 0 = utilisateur, 1 = admin
+const setUserPermissions = async (
+  id: number | string,
+  permissions: 0 | 1
+): Promise<User> => {
+  const res = await api.patch(`/users/${id}/`, { permissions });
+  return res.data;
+};
+
 export function B_admin_users() {
   return {
     toggleUserStatus,
     resetUserPassword,
+    setUserPermissions,
   };
 }

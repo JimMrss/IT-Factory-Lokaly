@@ -3,14 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { AnnonceCard } from '../components/AnnonceCard';
 import { GroupeCard } from '../components/GroupeCard';
-import { Plus, ArrowRight } from 'lucide-react';
+import { Plus, ArrowRight, Shield } from 'lucide-react';
 import { B_Annonces } from '../Composables/BRIDGE_annonces';
 import { B_groupes } from '../Composables/BRIDGE_groupe';
 import { B_users } from '../Composables/BRIDGE_users';
+import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 
 export function HomePage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  // permissions : 0 = utilisateur, 1 = admin (tolérant si l'API renvoie une chaîne "1")
+  const isAdmin = !!user && Number(user.permissions) === 1;
   const [annonces, setAnnonces] = useState<any[]>([]);
   const [groupes, setGroupes] = useState<any[]>([]);
   const [stats, setStats] = useState({ habitants: 0, annonces: 0, groupes: 0 });
@@ -78,6 +82,15 @@ export function HomePage() {
               >
                 Voir les annonces
               </Button>
+              {isAdmin && (
+                <Button
+                  variant="white"
+                  icon={<Shield size={18} />}
+                  onClick={() => navigate('/admin')}
+                >
+                  Espace admin
+                </Button>
+              )}
             </div>
 
             {/* Stats */}

@@ -37,7 +37,7 @@ export function LoginPage() {
 
     try {
       const user = await B_auth().login({ name: loginUsername, password: loginPassword });
-      login({ user_id: user.user_id, name: user.username ?? user.identifier, email: user.mail ?? user.email, password: loginPassword });
+      login({ user_id: user.user_id, name: user.username ?? user.identifier, email: user.mail ?? user.email, password: loginPassword, permissions: user.permissions });
       navigate('/');
     } catch {
       setError('Identifiants incorrects');
@@ -68,7 +68,7 @@ export function LoginPage() {
 
     try {
       const user = await B_auth().register({ name: registerUsername, mail: registerEmail, password: registerPassword });
-      login({ user_id: user.user_id, name: user.username ?? user.identifier, email: user.mail ?? user.email, password: registerPassword });
+      login({ user_id: user.user_id, name: user.username ?? user.identifier, email: user.mail ?? user.email, password: registerPassword, permissions: user.permissions });
       navigate('/');
     } catch {
       setError("Erreur lors de l'inscription. Réessayez.");
