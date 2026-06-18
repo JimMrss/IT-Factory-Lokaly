@@ -1,5 +1,5 @@
 import { api } from "./apiConnect";
-
+// Bridge pour les notifications
 export function B_notifications() {
   return { getNotifications, markAsRead, markAllAsRead };
 }
