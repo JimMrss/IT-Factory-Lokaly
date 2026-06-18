@@ -3,16 +3,41 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Badge } from '../components/Badge';
-import { UserPlus, Search, Eye, EyeOff, Key, Shield, ShieldOff } from 'lucide-react';
+import { UserPlus, Search, Eye, EyeOff, Key, Shield, ShieldOff, Filter } from 'lucide-react';
 import { B_users } from '../Composables/BRIDGE_users';
 import { B_auth } from '../Composables/BRIDGE_auth';
 import { B_admin_users } from '../Composables/Admin';
+import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 
+// Libellés et couleurs des statuts renvoyés par l'API
+const STATUT_LABEL: Record<string, string> = {
+  actif: 'Actif',
+  desactive: 'Désactivé',
+  en_attente: 'En attente',
+  refuse: 'Refusé',
+};
+const STATUT_STYLE: Record<string, string> = {
+  actif: 'bg-green-100 text-green-700 border-green-200',
+  desactive: 'bg-slate-200 text-slate-600 border-slate-300',
+  en_attente: 'bg-amber-100 text-amber-700 border-amber-200',
+  refuse: 'bg-red-100 text-red-700 border-red-200',
+};
+// Options du filtre par statut
+const STATUT_OPTIONS = [
+  { value: 'tous', label: 'Tous les statuts' },
+  { value: 'actif', label: 'Actif' },
+  { value: 'desactive', label: 'Désactivé' },
+  { value: 'en_attente', label: 'En attente' },
+  { value: 'refuse', label: 'Refusé' },
+];
+
 export function AdminUsersPage() {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statutFilter, setStatutFilter] = useState('tous');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', surname: '', mail: '', password: '' });
   const [creating, setCreating] = useState(false);
@@ -31,14 +56,19 @@ export function AdminUsersPage() {
     const parts = getNom(u).split(/\s+/).filter(Boolean);
     return ((parts[0]?.[0] ?? '?') + (parts[1]?.[0] ?? '')).toUpperCase();
   };
+  // Statut renvoyé par l'API (actif / desactive / en_attente / refuse). 'actif' par défaut si absent.
+  const getStatut = (u: any): string => u.statut ?? 'actif';
+  // Empêche un admin de se désactiver lui-même.
+  const isSelf = (u: any) => currentUser?.user_id != null && (u.user_id ?? u.id) === currentUser.user_id;
 
   const filteredUsers = users.filter((user) => {
     const q = searchTerm.toLowerCase();
-    return (
+    const matchSearch =
       getNom(user).toLowerCase().includes(q) ||
       (user.identifier ?? '').toLowerCase().includes(q) ||
-      (user.mail ?? '').toLowerCase().includes(q)
-    );
+      (user.mail ?? '').toLowerCase().includes(q);
+    const matchStatut = statutFilter === 'tous' || getStatut(user) === statutFilter;
+    return matchSearch && matchStatut;
   });
 
   const handleCreateUser = async () => {
@@ -62,7 +92,12 @@ export function AdminUsersPage() {
 
   const handleToggleStatus = async (user: any) => {
     const id = user.user_id ?? user.id;
-    const newStatut: 'actif' | 'desactive' = user.statut === 'actif' ? 'desactive' : 'actif';
+    const newStatut: 'actif' | 'desactive' = getStatut(user) === 'actif' ? 'desactive' : 'actif';
+    // Sécurité : on ne peut pas se désactiver soi-même.
+    if (newStatut === 'desactive' && isSelf(user)) {
+      toast.error('Vous ne pouvez pas désactiver votre propre compte.');
+      return;
+    }
     try {
       const { toggleUserStatus } = B_admin_users();
       await toggleUserStatus(id, newStatut);
@@ -124,8 +159,8 @@ export function AdminUsersPage() {
       </div>
 
       <Card>
-        <div className="p-4">
-          <div className="relative">
+        <div className="p-4 flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]">
               <Search size={20} />
             </div>
@@ -136,6 +171,20 @@ export function AdminUsersPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 rounded-lg border-2 border-[var(--color-border)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none transition-all"
             />
+          </div>
+          <div className="relative sm:w-56">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] pointer-events-none">
+              <Filter size={20} />
+            </div>
+            <select
+              value={statutFilter}
+              onChange={(e) => setStatutFilter(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 rounded-lg border-2 border-[var(--color-border)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none transition-all bg-white appearance-none cursor-pointer"
+            >
+              {STATUT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
           </div>
         </div>
       </Card>
@@ -148,11 +197,11 @@ export function AdminUsersPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[var(--color-border)]">
-                  <th className="text-left p-4 font-medium text-[var(--color-text-secondary)]">Utilisateur</th>
-                  <th className="text-left p-4 font-medium text-[var(--color-text-secondary)]">Identifiant</th>
-                  <th className="text-left p-4 font-medium text-[var(--color-text-secondary)]">Rôle</th>
-                  <th className="text-left p-4 font-medium text-[var(--color-text-secondary)]">Statut</th>
-                  <th className="text-right p-4 font-medium text-[var(--color-text-secondary)]">Actions</th>
+                  <th className="text-center p-4 font-medium text-[var(--color-text-secondary)]">Utilisateur</th>
+                  <th className="text-center p-4 font-medium text-[var(--color-text-secondary)]">Identifiant</th>
+                  <th className="text-center p-4 font-medium text-[var(--color-text-secondary)]">Rôle</th>
+                  <th className="text-center p-4 font-medium text-[var(--color-text-secondary)]">Statut</th>
+                  <th className="text-center p-4 font-medium text-[var(--color-text-secondary)]">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -166,8 +215,8 @@ export function AdminUsersPage() {
                   filteredUsers.map((user) => (
                     <tr key={user.user_id ?? user.id} className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-gray-50">
                       <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full flex items-center justify-center">
+                        <div className="flex items-center justify-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full flex items-center justify-center flex-shrink-0">
                             <span className="text-white font-medium">
                               {getInitials(user)}
                             </span>
@@ -175,21 +224,21 @@ export function AdminUsersPage() {
                           <p className="font-medium">{getNom(user)}</p>
                         </div>
                       </td>
-                      <td className="p-4">
+                      <td className="p-4 text-center">
                         <span className="text-[var(--color-text-secondary)]">@{user.identifier ?? '—'}</span>
                       </td>
-                      <td className="p-4">
+                      <td className="p-4 text-center">
                         <Badge variant={Number(user.permissions) === 1 ? 'primary' : 'neutral'}>
                           {Number(user.permissions) === 1 ? 'Admin' : 'Utilisateur'}
                         </Badge>
                       </td>
-                      <td className="p-4">
-                        <Badge variant={user.statut === 'actif' ? 'secondary' : 'neutral'}>
-                          {user.statut === 'actif' ? 'Actif' : user.statut === 'desactive' ? 'Désactivé' : '—'}
-                        </Badge>
+                      <td className="p-4 text-center">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm border font-medium ${STATUT_STYLE[getStatut(user)] ?? STATUT_STYLE.desactive}`}>
+                          {STATUT_LABEL[getStatut(user)] ?? getStatut(user)}
+                        </span>
                       </td>
                       <td className="p-4">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-center gap-2">
                           <Button
                             variant={Number(user.permissions) === 1 ? 'outline' : 'primary'}
                             size="sm"
@@ -207,12 +256,13 @@ export function AdminUsersPage() {
                             Réinit. MDP
                           </Button>
                           <Button
-                            variant={user.statut === 'actif' ? 'danger' : 'secondary'}
+                            variant={getStatut(user) === 'actif' ? 'danger' : 'secondary'}
                             size="sm"
-                            icon={user.statut === 'actif' ? <EyeOff size={16} /> : <Eye size={16} />}
+                            icon={getStatut(user) === 'actif' ? <EyeOff size={16} /> : <Eye size={16} />}
                             onClick={() => handleToggleStatus(user)}
+                            disabled={isSelf(user) && getStatut(user) === 'actif'}
                           >
-                            {user.statut === 'actif' ? 'Désactiver' : 'Activer'}
+                            {getStatut(user) === 'actif' ? 'Désactiver' : 'Activer'}
                           </Button>
                         </div>
                       </td>

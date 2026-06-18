@@ -38,19 +38,31 @@ export function LoginPage() {
 
     try {
       const user = await B_auth().login({ name: loginUsername, password: loginPassword });
-      // La réponse de /auth/login/ ne contient pas le champ `permissions`.
-      // On le récupère depuis la liste des utilisateurs (match par user_id ou identifiant).
-      let permissions = user.permissions;
-      if (permissions === undefined) {
-        try {
-          const all = await B_users().getAllUsers();
-          const me = (Array.isArray(all) ? all : []).find((u: any) =>
-            (user.user_id != null && u.user_id === user.user_id) ||
-            u.identifier === loginUsername
-          );
-          permissions = me?.permissions;
-        } catch { /* on garde permissions = undefined */ }
+      // La réponse de /auth/login/ ne contient ni `permissions` ni `statut`.
+      // On récupère le profil complet depuis la liste des utilisateurs.
+      let me: any = null;
+      try {
+        const all = await B_users().getAllUsers();
+        me = (Array.isArray(all) ? all : []).find((u: any) =>
+          (user.user_id != null && u.user_id === user.user_id) ||
+          u.identifier === loginUsername
+        );
+      } catch { /* profil indisponible : on continue avec les infos du login */ }
+
+      // Seuls les comptes actifs peuvent se connecter.
+      const statut: string | undefined = me?.statut;
+      if (statut && statut !== 'actif') {
+        const messages: Record<string, string> = {
+          desactive: 'Votre compte est désactivé. Contactez un administrateur.',
+          en_attente: "Votre compte est en attente de validation par un administrateur.",
+          refuse: 'Votre compte a été refusé. Contactez un administrateur.',
+        };
+        setError(messages[statut] ?? "Votre compte n'est pas actif. Contactez un administrateur.");
+        setIsLoading(false);
+        return;
       }
+
+      const permissions = me?.permissions ?? user.permissions;
       login({ user_id: user.user_id, name: user.username ?? user.identifier, email: user.mail ?? user.email, password: loginPassword, permissions });
       navigate('/');
     } catch {
