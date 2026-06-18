@@ -5,23 +5,12 @@ export interface AdminUserStatusPayload {
   statut: "actif" | "desactive";
 }
 
-export interface AdminResetPasswordPayload {
-  password: string;
-}
-
 const toggleUserStatus = async (
   id: number | string,
   statut: "actif" | "desactive"
 ): Promise<User> => {
-  const res = await api.patch(`/users/${id}/`, { statut });
+  const res = await api.patch(`/users/${id}`, { statut });
   return res.data;
-};
-
-const resetUserPassword = async (
-  id: number | string,
-  newPassword: string
-): Promise<void> => {
-  await api.post(`/users/${id}/reset-password/`, { password: newPassword });
 };
 
 // Bascule le rôle admin de l'utilisateur. permissions : 0 = utilisateur, 1 = admin
@@ -29,14 +18,13 @@ const setUserPermissions = async (
   id: number | string,
   permissions: 0 | 1
 ): Promise<User> => {
-  const res = await api.patch(`/users/${id}/`, { permissions });
+  const res = await api.patch(`/users/${id}`, { permissions });
   return res.data;
 };
 
 export function B_admin_users() {
   return {
     toggleUserStatus,
-    resetUserPassword,
     setUserPermissions,
   };
 }

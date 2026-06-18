@@ -3,7 +3,7 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Badge } from '../components/Badge';
-import { UserPlus, Search, Eye, EyeOff, Key, Shield, ShieldOff, Filter } from 'lucide-react';
+import { UserPlus, Search, Eye, EyeOff, Shield, ShieldOff, Filter } from 'lucide-react';
 import { B_users } from '../Composables/BRIDGE_users';
 import { B_auth } from '../Composables/BRIDGE_auth';
 import { B_admin_users } from '../Composables/Admin';
@@ -23,13 +23,11 @@ const STATUT_STYLE: Record<string, string> = {
   en_attente: 'bg-amber-100 text-amber-700 border-amber-200',
   refuse: 'bg-red-100 text-red-700 border-red-200',
 };
-// Options du filtre par statut
+// Options du filtre par statut (en_attente / refuse sont gérés dans la page Validation)
 const STATUT_OPTIONS = [
   { value: 'tous', label: 'Tous les statuts' },
   { value: 'actif', label: 'Actif' },
   { value: 'desactive', label: 'Désactivé' },
-  { value: 'en_attente', label: 'En attente' },
-  { value: 'refuse', label: 'Refusé' },
 ];
 
 export function AdminUsersPage() {
@@ -62,12 +60,15 @@ export function AdminUsersPage() {
   const isSelf = (u: any) => currentUser?.user_id != null && (u.user_id ?? u.id) === currentUser.user_id;
 
   const filteredUsers = users.filter((user) => {
+    const statut = getStatut(user);
+    // Seuls les comptes actifs / désactivés sont gérés ici ; en_attente et refuse vont dans Validation.
+    if (statut !== 'actif' && statut !== 'desactive') return false;
     const q = searchTerm.toLowerCase();
     const matchSearch =
       getNom(user).toLowerCase().includes(q) ||
       (user.identifier ?? '').toLowerCase().includes(q) ||
       (user.mail ?? '').toLowerCase().includes(q);
-    const matchStatut = statutFilter === 'tous' || getStatut(user) === statutFilter;
+    const matchStatut = statutFilter === 'tous' || statut === statutFilter;
     return matchSearch && matchStatut;
   });
 
@@ -125,18 +126,6 @@ export function AdminUsersPage() {
       );
     } catch {
       toast.error('Erreur lors de la mise à jour du rôle.');
-    }
-  };
-
-  const handleResetPassword = async (user: any) => {
-    const newPassword = window.prompt(`Nouveau mot de passe pour ${getNom(user)} :`);
-    if (!newPassword) return;
-    try {
-      const { resetUserPassword } = B_admin_users();
-      await resetUserPassword(user.user_id ?? user.id, newPassword);
-      toast.success(`Mot de passe réinitialisé pour ${getNom(user)}.`);
-    } catch {
-      toast.error('Erreur lors de la réinitialisation du mot de passe.');
     }
   };
 
@@ -246,14 +235,6 @@ export function AdminUsersPage() {
                             onClick={() => handleToggleAdmin(user)}
                           >
                             {Number(user.permissions) === 1 ? 'Retirer admin' : 'Rendre admin'}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            icon={<Key size={16} />}
-                            onClick={() => handleResetPassword(user)}
-                          >
-                            Réinit. MDP
                           </Button>
                           <Button
                             variant={getStatut(user) === 'actif' ? 'danger' : 'secondary'}

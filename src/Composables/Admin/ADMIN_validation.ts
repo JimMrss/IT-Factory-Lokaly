@@ -7,6 +7,7 @@ const getPendingHabitants = async (): Promise<HabitantEnAttente[]> => {
 };
 
 const validateHabitant = async (id: number | string): Promise<HabitantEnAttente> => {
+  // Validé = "valide" : l'utilisateur passera à "actif" lors de sa 1re connexion.
   const res = await api.patch(`/users/${id}`, { statut: "valide" });
   return res.data;
 };

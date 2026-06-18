@@ -49,18 +49,19 @@ export function LoginPage() {
         );
       } catch { /* profil indisponible : on continue avec les infos du login */ }
 
-      // Seuls les comptes actifs peuvent se connecter.
+      // Statuts qui interdisent la connexion.
       const statut: string | undefined = me?.statut;
-      if (statut && statut !== 'actif') {
-        const messages: Record<string, string> = {
-          desactive: 'Votre compte est désactivé. Contactez un administrateur.',
-          en_attente: "Votre compte est en attente de validation par un administrateur.",
-          refuse: 'Votre compte a été refusé. Contactez un administrateur.',
-        };
-        setError(messages[statut] ?? "Votre compte n'est pas actif. Contactez un administrateur.");
+      const blocked: Record<string, string> = {
+        desactive: 'Votre compte est désactivé. Contactez un administrateur.',
+        en_attente: 'Votre compte est en attente de validation par un administrateur.',
+        refuse: 'Votre compte a été refusé. Contactez un administrateur.',
+      };
+      if (statut && blocked[statut]) {
+        setError(blocked[statut]);
         setIsLoading(false);
         return;
       }
+      // Un compte "valide" peut se connecter : le backend le bascule lui-même en "actif".
 
       const permissions = me?.permissions ?? user.permissions;
       login({ user_id: user.user_id, name: user.username ?? user.identifier, email: user.mail ?? user.email, password: loginPassword, permissions });
