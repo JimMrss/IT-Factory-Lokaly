@@ -2,17 +2,17 @@ import { api } from "../apiConnect";
 import type { HabitantEnAttente } from "../../types";
 
 const getPendingHabitants = async (): Promise<HabitantEnAttente[]> => {
-  const res = await api.get("/users/", { params: { statut: "en_attente" } });
+  const res = await api.get("/users", { params: { statut: "en_attente" } });
   return res.data;
 };
 
 const validateHabitant = async (id: number | string): Promise<HabitantEnAttente> => {
-  const res = await api.patch(`/users/${id}/`, { statut: "valide" });
+  const res = await api.patch(`/users/${id}`, { statut: "valide" });
   return res.data;
 };
 
 const refuseHabitant = async (id: number | string): Promise<HabitantEnAttente> => {
-  const res = await api.patch(`/users/${id}/`, { statut: "refuse" });
+  const res = await api.patch(`/users/${id}`, { statut: "refuse" });
   return res.data;
 };
 

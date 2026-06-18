@@ -7,6 +7,7 @@ export interface AuthPayload {
     surname?: string;
     mail?: string;
     password?: string;
+    permissions?: number;
 }
 export function B_auth() {
     const login = async (payload: AuthPayload): Promise<any> => {
@@ -28,6 +29,7 @@ export function B_auth() {
                 rPayload[k] = payload[k] as any;
             }
         }
+        if(!rPayload.permissions) rPayload.permissions = 0;
         const res = await api.post('/auth/register/', rPayload);
         return res.data;
     }
