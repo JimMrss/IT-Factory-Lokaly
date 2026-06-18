@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Users, Heart, MessageCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { B_auth } from '../Composables/BRIDGE_auth';
+import { B_users } from '../Composables/BRIDGE_users';
 
 // Plus besoin de props — on utilise le contexte et le router directement
 export function LoginPage() {
@@ -37,7 +38,20 @@ export function LoginPage() {
 
     try {
       const user = await B_auth().login({ name: loginUsername, password: loginPassword });
-      login({ user_id: user.user_id, name: user.username ?? user.identifier, email: user.mail ?? user.email, password: loginPassword, permissions: user.permissions });
+      // La réponse de /auth/login/ ne contient pas le champ `permissions`.
+      // On le récupère depuis la liste des utilisateurs (match par user_id ou identifiant).
+      let permissions = user.permissions;
+      if (permissions === undefined) {
+        try {
+          const all = await B_users().getAllUsers();
+          const me = (Array.isArray(all) ? all : []).find((u: any) =>
+            (user.user_id != null && u.user_id === user.user_id) ||
+            u.identifier === loginUsername
+          );
+          permissions = me?.permissions;
+        } catch { /* on garde permissions = undefined */ }
+      }
+      login({ user_id: user.user_id, name: user.username ?? user.identifier, email: user.mail ?? user.email, password: loginPassword, permissions });
       navigate('/');
     } catch {
       setError('Identifiants incorrects');
@@ -68,7 +82,8 @@ export function LoginPage() {
 
     try {
       const user = await B_auth().register({ name: registerUsername, mail: registerEmail, password: registerPassword });
-      login({ user_id: user.user_id, name: user.username ?? user.identifier, email: user.mail ?? user.email, password: registerPassword, permissions: user.permissions });
+      // Un nouvel inscrit n'est jamais admin (permissions: 0 côté backend).
+      login({ user_id: user.user_id, name: user.username ?? user.identifier, email: user.mail ?? user.email, password: registerPassword, permissions: user.permissions ?? 0 });
       navigate('/');
     } catch {
       setError("Erreur lors de l'inscription. Réessayez.");
