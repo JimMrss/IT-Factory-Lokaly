@@ -4,6 +4,7 @@ import { Button } from '../components/Button';
 import { Select } from '../components/Select';
 import { Check, X } from 'lucide-react';
 import { B_users } from '../Composables/BRIDGE_users';
+import { B_admin_validation } from '../Composables/Admin';
 import { toast } from 'sonner';
 
 type Statut = 'en_attente' | 'valide' | 'refuse';
@@ -11,11 +12,15 @@ type Statut = 'en_attente' | 'valide' | 'refuse';
 interface UserWithStatut {
   user_id?: number;
   id?: string;
-  name: string;
-  surname: string;
+  nom?: string;
+  name?: string;
+  surname?: string;
   identifier?: string;
   statut: Statut;
 }
+
+// L'API renvoie le nom complet dans le champ `nom`.
+const getNom = (u: UserWithStatut) => (u.nom ?? `${u.name ?? ''} ${u.surname ?? ''}`).trim();
 
 export function AdminValidationPage() {
   const [users, setUsers] = useState<UserWithStatut[]>([]);
@@ -36,18 +41,30 @@ export function AdminValidationPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleValidate = (id: number | string) => {
-    setUsers((prev) =>
-      prev.map((u) => (getKey(u) === id ? { ...u, statut: 'valide' } : u))
-    );
-    toast.success('Utilisateur validé avec succès !');
+  const handleValidate = async (id: number | string) => {
+    try {
+      const { validateHabitant } = B_admin_validation();
+      await validateHabitant(id);
+      setUsers((prev) =>
+        prev.map((u) => (getKey(u) === id ? { ...u, statut: 'valide' } : u))
+      );
+      toast.success('Utilisateur validé avec succès !');
+    } catch {
+      toast.error('Erreur lors de la validation.');
+    }
   };
 
-  const handleReject = (id: number | string) => {
-    setUsers((prev) =>
-      prev.map((u) => (getKey(u) === id ? { ...u, statut: 'refuse' } : u))
-    );
-    toast.error('Demande refusée.');
+  const handleReject = async (id: number | string) => {
+    try {
+      const { refuseHabitant } = B_admin_validation();
+      await refuseHabitant(id);
+      setUsers((prev) =>
+        prev.map((u) => (getKey(u) === id ? { ...u, statut: 'refuse' } : u))
+      );
+      toast.error('Demande refusée.');
+    } catch {
+      toast.error('Erreur lors du refus.');
+    }
   };
 
   const getKey = (u: UserWithStatut) => u.user_id ?? u.id ?? '';
@@ -108,7 +125,7 @@ export function AdminValidationPage() {
                   filteredUsers.map((user) => (
                     <tr key={getKey(user)} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
-                        <p className="font-medium">{user.name} {user.surname}</p>
+                        <p className="font-medium">{getNom(user)}</p>
                       </td>
                       <td className="px-6 py-4 text-[var(--color-text-secondary)]">
                         @{user.identifier ?? '—'}

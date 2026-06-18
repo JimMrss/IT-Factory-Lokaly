@@ -2,22 +2,81 @@ import React, { useState, useEffect } from 'react';
 import { StatCard } from '../components/StatCard';
 import { Card } from '../components/Card';
 import { FileText, Users, Users as GroupsIcon, TrendingUp } from 'lucide-react';
-import { B_admin_stats } from '../Composables/Admin';
+import { B_users } from '../Composables/BRIDGE_users';
+import { B_groupes } from '../Composables/BRIDGE_groupe';
+import { B_Annonces } from '../Composables/BRIDGE_annonces';
+import { B_Evenements } from '../Composables/BRIDGE_evenements';
 import { toast } from 'sonner';
-import type { Stats, ActiviteMensuelle } from '../types';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
+interface DashboardStats {
+  total_users: number;
+  total_groupes: number;
+  total_annonces: number;
+  total_evenements: number;
+}
+
+interface ActiviteMensuelle {
+  mois: string;
+  annonces: number;
+  evenements: number;
+}
+
+interface RecentItem {
+  label: string;
+  detail: string;
+  date: string;
+}
+
+// Agrège des éléments datés (annonces, événements) par mois (clé YYYY-MM).
+function buildMonthlyActivity(annonces: any[], evenements: any[]): ActiviteMensuelle[] {
+  const map = new Map<string, ActiviteMensuelle>();
+  const add = (date: string | undefined, key: 'annonces' | 'evenements') => {
+    if (!date) return;
+    const mois = String(date).slice(0, 7); // YYYY-MM
+    if (!map.has(mois)) map.set(mois, { mois, annonces: 0, evenements: 0 });
+    map.get(mois)![key] += 1;
+  };
+  annonces.forEach((a) => add(a.date, 'annonces'));
+  evenements.forEach((e) => add(e.date, 'evenements'));
+  return [...map.values()].sort((a, b) => a.mois.localeCompare(b.mois));
+}
+
 export function AdminDashboardPage() {
-  const [stats, setStats] = useState<Stats | null>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activite, setActivite] = useState<ActiviteMensuelle[]>([]);
+  const [recent, setRecent] = useState<RecentItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { getDashboardStats, getMonthlyActivity } = B_admin_stats();
-    Promise.all([getDashboardStats(), getMonthlyActivity()])
-      .then(([s, a]) => {
-        setStats(s);
-        setActivite(Array.isArray(a) ? a : []);
+    const { getAllUsers } = B_users();
+    const { getAllGroups } = B_groupes();
+    const { getAllAnnonces } = B_Annonces();
+    const { getAllEvenements } = B_Evenements();
+    Promise.all([getAllUsers(), getAllGroups(), getAllAnnonces(), getAllEvenements()])
+      .then(([users, groupes, annonces, evenements]) => {
+        const usersArr: any[] = Array.isArray(users) ? users : [];
+        const groupesArr: any[] = Array.isArray(groupes) ? groupes : [];
+        const annoncesArr: any[] = Array.isArray(annonces) ? annonces : [];
+        const evenementsArr: any[] = Array.isArray(evenements) ? evenements : [];
+
+        setStats({
+          total_users: usersArr.length,
+          total_groupes: groupesArr.length,
+          total_annonces: annoncesArr.length,
+          total_evenements: evenementsArr.length,
+        });
+        setActivite(buildMonthlyActivity(annoncesArr, evenementsArr));
+
+        // Activité récente : annonces + événements les plus récents
+        const items: RecentItem[] = [
+          ...annoncesArr.map((a) => ({ label: 'Annonce publiée', detail: a.name, date: a.date })),
+          ...evenementsArr.map((e) => ({ label: 'Événement créé', detail: e.name, date: e.date })),
+        ]
+          .filter((i) => i.detail)
+          .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+          .slice(0, 4);
+        setRecent(items);
       })
       .catch(() => toast.error('Impossible de charger les statistiques.'))
       .finally(() => setLoading(false));
@@ -41,25 +100,21 @@ export function AdminDashboardPage() {
               title="Annonces actives"
               value={stats?.total_annonces ?? '—'}
               icon={<FileText size={24} />}
-              trend={{ value: 12, isPositive: true }}
             />
             <StatCard
               title="Habitants inscrits"
               value={stats?.total_users ?? '—'}
               icon={<Users size={24} />}
-              trend={{ value: 8, isPositive: true }}
             />
             <StatCard
               title="Groupes actifs"
               value={stats?.total_groupes ?? '—'}
               icon={<GroupsIcon size={24} />}
-              trend={{ value: 5, isPositive: true }}
             />
             <StatCard
-              title="Taux de participation"
-              value={stats?.taux_participation != null ? `${stats.taux_participation}%` : '—'}
+              title="Événements"
+              value={stats?.total_evenements ?? '—'}
               icon={<TrendingUp size={24} />}
-              trend={{ value: 3, isPositive: true }}
             />
           </div>
 
@@ -106,35 +161,28 @@ export function AdminDashboardPage() {
           <Card>
             <div className="p-6">
               <h3 className="mb-4">Activité récente</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between py-3 border-b border-[var(--color-border)]">
-                  <div>
-                    <p className="font-medium">Nouvelle annonce publiée</p>
-                    <p className="text-sm text-[var(--color-text-secondary)]">
-                      "Prêt de tondeuse à gazon" par Marie Dubois
-                    </p>
-                  </div>
-                  <span className="text-sm text-[var(--color-text-secondary)]">Il y a 2h</span>
+              {recent.length === 0 ? (
+                <p className="text-sm text-[var(--color-text-secondary)] py-3">
+                  Aucune activité récente.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {recent.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between py-3 border-b border-[var(--color-border)] last:border-b-0"
+                    >
+                      <div>
+                        <p className="font-medium">{item.label}</p>
+                        <p className="text-sm text-[var(--color-text-secondary)]">
+                          "{item.detail}"
+                        </p>
+                      </div>
+                      <span className="text-sm text-[var(--color-text-secondary)]">{item.date}</span>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center justify-between py-3 border-b border-[var(--color-border)]">
-                  <div>
-                    <p className="font-medium">Nouveau membre validé</p>
-                    <p className="text-sm text-[var(--color-text-secondary)]">
-                      Marc Durand a rejoint la communauté
-                    </p>
-                  </div>
-                  <span className="text-sm text-[var(--color-text-secondary)]">Il y a 5h</span>
-                </div>
-                <div className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="font-medium">Nouveau groupe créé</p>
-                    <p className="text-sm text-[var(--color-text-secondary)]">
-                      "Repair Café" par Sophie Martin
-                    </p>
-                  </div>
-                  <span className="text-sm text-[var(--color-text-secondary)]">Hier</span>
-                </div>
-              </div>
+              )}
             </div>
           </Card>
         </>

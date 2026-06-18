@@ -72,7 +72,7 @@ export function AdminGroupsPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">
-                    Niveau {groupes.length > 0 ? Math.max(...groupes.map((g) => g.niveau)) : '—'}
+                    Niveau {groupes.length > 0 ? Math.max(...groupes.map((g) => Number(g.niveau) || 0)) : '—'}
                   </p>
                   <p className="text-sm text-[var(--color-text-secondary)]">Niveau max atteint</p>
                 </div>
@@ -103,7 +103,7 @@ export function AdminGroupsPage() {
                 <div className="p-6 space-y-4">
                   <div className="flex items-start justify-between gap-3">
                     <h4 className="flex-1 min-w-0 truncate">{groupe.name}</h4>
-                    <Badge variant="level" level={groupe.niveau} />
+                    <Badge variant="level" level={Number(groupe.niveau) || 1} />
                   </div>
 
                   <p className="text-sm text-[var(--color-text-secondary)] line-clamp-2">

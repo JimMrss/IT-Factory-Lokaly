@@ -5,10 +5,27 @@ import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { ArrowLeft, Users, Calendar, Heart, UserMinus } from 'lucide-react';
 import { B_groupes } from '../Composables/BRIDGE_groupe';
-import { B_admin_groupes } from '../Composables/Admin';
+import { B_users } from '../Composables/BRIDGE_users';
+import { B_Annonces } from '../Composables/BRIDGE_annonces';
 import { toast } from 'sonner';
 import type { Group } from '../Composables/BRIDGE_groupe';
-import type { GroupMember, GroupInterested } from '../Composables/Admin';
+
+// Format réel de l'API : l'utilisateur a un champ `nom` (et `user_id`).
+interface GroupMember {
+  user_id: number;
+  nom?: string;
+  identifier?: string;
+}
+interface GroupInterested extends GroupMember {
+  annonce_id: number;
+  annonce_name: string;
+}
+
+const getNom = (u: { nom?: string }) => u.nom ?? '—';
+const getInitials = (u: { nom?: string }) => {
+  const parts = (u.nom ?? '').split(/\s+/).filter(Boolean);
+  return ((parts[0]?.[0] ?? '?') + (parts[1]?.[0] ?? '')).toUpperCase();
+};
 
 export function AdminGroupDetailPage() {
   const [groupe, setGroupe] = useState<Group | null>(null);
@@ -23,16 +40,49 @@ export function AdminGroupDetailPage() {
   useEffect(() => {
     if (!id) return;
     const { getGroup } = B_groupes();
-    const { getGroupMembers, getGroupInterested } = B_admin_groupes();
-    Promise.all([getGroup(id), getGroupMembers(id), getGroupInterested(id)])
-      .then(([g, m, i]) => {
+    const { getAllUsers } = B_users();
+    const { getAllAnnonces } = B_Annonces();
+    Promise.all([getGroup(id), getAllUsers(), getAllAnnonces()])
+      .then(([g, users, annonces]) => {
         setGroupe(g);
-        setMembres(Array.isArray(m) ? m : []);
-        setInteresses(Array.isArray(i) ? i : []);
+        const usersArr: any[] = Array.isArray(users) ? users : [];
+        const userById = new Map<number, any>(usersArr.map((u) => [u.user_id, u]));
+
+        // Membres : IDs présents dans groupe.members, résolus via /users/
+        const memberIds: number[] = Array.isArray(g.members) ? g.members : [];
+        setMembres(
+          memberIds.map((uid) => userById.get(uid)).filter(Boolean) as GroupMember[]
+        );
+
+        // Intéressés : utilisateurs des interested_users des annonces du groupe
+        const annoncesArr: any[] = Array.isArray(annonces) ? annonces : [];
+        const groupAnnonceIds: number[] = Array.isArray(g.annonces) ? g.annonces : [];
+        const interestedList: GroupInterested[] = [];
+        annoncesArr
+          .filter((a) => groupAnnonceIds.includes(a.annonce_id))
+          .forEach((a) => {
+            (a.interested_users ?? []).forEach((uid: number) => {
+              const u = userById.get(uid);
+              if (u) interestedList.push({ ...u, annonce_id: a.annonce_id, annonce_name: a.name });
+            });
+          });
+        setInteresses(interestedList);
       })
       .catch(() => toast.error('Impossible de charger les données du groupe.'))
       .finally(() => setLoading(false));
   }, [id]);
+
+  const handleRemoveMember = async (membre: GroupMember) => {
+    if (!id) return;
+    try {
+      const { removeMemberFromGroup } = B_groupes();
+      await removeMemberFromGroup(id, membre.user_id);
+      setMembres((prev) => prev.filter((m) => m.user_id !== membre.user_id));
+      toast.success(`${getNom(membre)} a été retiré du groupe.`);
+    } catch {
+      toast.error('Erreur lors du retrait du membre.');
+    }
+  };
 
   if (loading) {
     return <div className="text-center py-12 text-[var(--color-text-secondary)]">Chargement...</div>;
@@ -68,7 +118,7 @@ export function AdminGroupDetailPage() {
           <div>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="min-w-0">{groupe.name}</h1>
-              <Badge variant="level" level={groupe.niveau} />
+              <Badge variant="level" level={Number(groupe.niveau) || 1} />
             </div>
             <p className="text-[var(--color-text-secondary)] mt-2">{groupe.description}</p>
           </div>
@@ -162,15 +212,15 @@ export function AdminGroupDetailPage() {
                   </tr>
                 ) : (
                   membres.map((membre) => (
-                    <tr key={membre.id} className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-gray-50">
+                    <tr key={membre.user_id} className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-gray-50">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full flex items-center justify-center">
                             <span className="text-white font-medium">
-                              {(membre.name?.[0] ?? '?')}{(membre.surname?.[0] ?? '?')}
+                              {getInitials(membre)}
                             </span>
                           </div>
-                          <span className="font-medium">{membre.name} {membre.surname}</span>
+                          <span className="font-medium">{getNom(membre)}</span>
                         </div>
                       </td>
                       <td className="p-4 text-[var(--color-text-secondary)]">
@@ -182,7 +232,7 @@ export function AdminGroupDetailPage() {
                             variant="outline"
                             size="sm"
                             icon={<UserMinus size={16} />}
-                            onClick={() => toast.info(`Retirer ${membre.name} ${membre.surname} du groupe ?`)}
+                            onClick={() => handleRemoveMember(membre)}
                           >
                             Retirer
                           </Button>
@@ -216,16 +266,16 @@ export function AdminGroupDetailPage() {
                     </td>
                   </tr>
                 ) : (
-                  interesses.map((interesse) => (
-                    <tr key={interesse.user_id} className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-gray-50">
+                  interesses.map((interesse, idx) => (
+                    <tr key={`${interesse.user_id}-${interesse.annonce_id}-${idx}`} className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-gray-50">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full flex items-center justify-center">
                             <span className="text-white font-medium">
-                              {(interesse.name?.[0] ?? '?')}{(interesse.surname?.[0] ?? '?')}
+                              {getInitials(interesse)}
                             </span>
                           </div>
-                          <span className="font-medium">{interesse.name} {interesse.surname}</span>
+                          <span className="font-medium">{getNom(interesse)}</span>
                         </div>
                       </td>
                       <td className="p-4 text-[var(--color-text-secondary)]">
