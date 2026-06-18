@@ -2,33 +2,102 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../components/Card';
 import { StatCard } from '../components/StatCard';
 import { FileText, Users, TrendingUp, Calendar } from 'lucide-react';
-import { B_admin_stats } from '../Composables/Admin';
+import { B_users } from '../Composables/BRIDGE_users';
+import { B_groupes } from '../Composables/BRIDGE_groupe';
+import { B_Annonces } from '../Composables/BRIDGE_annonces';
+import { B_Evenements } from '../Composables/BRIDGE_evenements';
 import { toast } from 'sonner';
-import type { Stats, ActiviteMensuelle } from '../types';
-import type { CategoryStat, GroupStat } from '../Composables/Admin';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const COLORS = ['#1e40af', '#3b82f6', '#fbbf24', '#ef4444'];
 
+// Les statistiques sont CALCULÉES côté front à partir des données existantes
+// (utilisateurs, groupes, annonces, événements) — pas d'endpoint /stats/ stocké.
+interface StatsData { total_annonces: number; total_users: number; total_groupes: number; taux_participation: number; }
+interface ActiviteMensuelle { mois: string; annonces: number; evenements: number; }
+interface CategoryStat { name: string; value: number; }
+interface GroupStat { name: string; annonces: number; membres: number; }
+
+// Agrège les éléments datés par mois (clé YYYY-MM).
+function buildMonthlyActivity(annonces: any[], evenements: any[]): ActiviteMensuelle[] {
+  const map = new Map<string, ActiviteMensuelle>();
+  const add = (date: string | undefined, key: 'annonces' | 'evenements') => {
+    if (!date) return;
+    const mois = String(date).slice(0, 7);
+    if (!map.has(mois)) map.set(mois, { mois, annonces: 0, evenements: 0 });
+    map.get(mois)![key] += 1;
+  };
+  annonces.forEach((a) => add(a.date, 'annonces'));
+  evenements.forEach((e) => add(e.date, 'evenements'));
+  return [...map.values()].sort((a, b) => a.mois.localeCompare(b.mois));
+}
+
 export function AdminStatsPage() {
-  const [stats, setStats] = useState<Stats | null>(null);
+  const [stats, setStats] = useState<StatsData | null>(null);
   const [activite, setActivite] = useState<ActiviteMensuelle[]>([]);
   const [categories, setCategories] = useState<CategoryStat[]>([]);
   const [groupes, setGroupes] = useState<GroupStat[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { getDashboardStats, getMonthlyActivity, getStatsByCategory, getStatsByGroup } = B_admin_stats();
-    Promise.all([getDashboardStats(), getMonthlyActivity(), getStatsByCategory(), getStatsByGroup()])
-      .then(([s, a, c, g]) => {
-        setStats(s);
-        setActivite(Array.isArray(a) ? a : []);
-        setCategories(Array.isArray(c) ? c : []);
-        setGroupes(Array.isArray(g) ? g : []);
+    const { getAllUsers } = B_users();
+    const { getAllGroups } = B_groupes();
+    const { getAllAnnonces } = B_Annonces();
+    const { getAllEvenements } = B_Evenements();
+    Promise.all([getAllUsers(), getAllGroups(), getAllAnnonces(), getAllEvenements()])
+      .then(([users, groupesData, annonces, evenements]) => {
+        const usersArr: any[] = Array.isArray(users) ? users : [];
+        const groupesArr: any[] = Array.isArray(groupesData) ? groupesData : [];
+        const annoncesArr: any[] = Array.isArray(annonces) ? annonces : [];
+        const evenementsArr: any[] = Array.isArray(evenements) ? evenements : [];
+
+        // Taux de participation : part des habitants ayant publié ou manifesté un intérêt.
+        const participants = new Set<number>();
+        annoncesArr.forEach((a) => {
+          if (a.provider != null) participants.add(a.provider);
+          (Array.isArray(a.interested_users) ? a.interested_users : []).forEach((u: number) => participants.add(u));
+        });
+        evenementsArr.forEach((e) => { if (e.provider != null) participants.add(e.provider); });
+        const taux = usersArr.length ? Math.round((participants.size / usersArr.length) * 100) : 0;
+
+        setStats({
+          total_annonces: annoncesArr.length,
+          total_users: usersArr.length,
+          total_groupes: groupesArr.length,
+          taux_participation: taux,
+        });
+        setActivite(buildMonthlyActivity(annoncesArr, evenementsArr));
+
+        // Annonces par catégorie (champ `type` : Offre / Demande / ...).
+        const catMap = new Map<string, number>();
+        annoncesArr.forEach((a) => {
+          const key = a.type || 'Autre';
+          catMap.set(key, (catMap.get(key) ?? 0) + 1);
+        });
+        setCategories([...catMap.entries()].map(([name, value]) => ({ name, value })));
+
+        // Activité par groupe (annonces + membres), trié par nombre d'annonces.
+        const gStats: GroupStat[] = groupesArr
+          .map((g) => ({
+            name: g.name,
+            annonces: Array.isArray(g.annonces) ? g.annonces.length : 0,
+            membres: Array.isArray(g.members) ? g.members.length : 0,
+          }))
+          .sort((a, b) => b.annonces - a.annonces);
+        setGroupes(gStats);
       })
       .catch(() => toast.error('Impossible de charger les statistiques.'))
       .finally(() => setLoading(false));
   }, []);
+
+  // Croissance des annonces : dernier mois vs mois précédent.
+  const croissance = (() => {
+    if (activite.length < 2) return null;
+    const last = activite[activite.length - 1].annonces;
+    const prev = activite[activite.length - 2].annonces;
+    if (prev === 0) return null;
+    return Math.round(((last - prev) / prev) * 100);
+  })();
 
   return (
     <div className="space-y-8">
@@ -48,25 +117,22 @@ export function AdminStatsPage() {
               title="Annonces totales"
               value={stats?.total_annonces ?? '—'}
               icon={<FileText size={24} />}
-              trend={{ value: 12, isPositive: true }}
+              trend={croissance != null ? { value: croissance, isPositive: croissance >= 0 } : undefined}
             />
             <StatCard
-              title="Habitants actifs"
+              title="Habitants inscrits"
               value={stats?.total_users ?? '—'}
               icon={<Users size={24} />}
-              trend={{ value: 8, isPositive: true }}
             />
             <StatCard
               title="Taux d'engagement"
               value={stats?.taux_participation != null ? `${stats.taux_participation}%` : '—'}
               icon={<TrendingUp size={24} />}
-              trend={{ value: 3, isPositive: true }}
             />
             <StatCard
               title="Groupes actifs"
               value={stats?.total_groupes ?? '—'}
               icon={<Calendar size={24} />}
-              trend={{ value: 15, isPositive: true }}
             />
           </div>
 
@@ -147,9 +213,11 @@ export function AdminStatsPage() {
                 <h3>Insights clés</h3>
                 <div className="space-y-4">
                   <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="font-medium text-blue-900">Croissance forte</p>
+                    <p className="font-medium text-blue-900">Évolution des annonces</p>
                     <p className="text-sm text-blue-700 mt-1">
-                      +12% d{'\''}annonces ce mois par rapport au mois dernier
+                      {croissance != null
+                        ? `${croissance >= 0 ? '+' : ''}${croissance}% d'annonces ce mois par rapport au mois dernier`
+                        : 'Pas assez de données pour comparer les mois'}
                     </p>
                   </div>
                   <div className="p-4 bg-green-50 rounded-lg border border-green-200">

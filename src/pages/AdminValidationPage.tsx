@@ -7,7 +7,7 @@ import { B_users } from '../Composables/BRIDGE_users';
 import { B_admin_validation } from '../Composables/Admin';
 import { toast } from 'sonner';
 
-type Statut = 'en_attente' | 'valide' | 'refuse';
+type Statut = 'en_attente' | 'valide' | 'actif' | 'refuse' | 'desactive';
 
 interface UserWithStatut {
   user_id?: number;
@@ -25,16 +25,16 @@ const getNom = (u: UserWithStatut) => (u.nom ?? `${u.name ?? ''} ${u.surname ?? 
 export function AdminValidationPage() {
   const [users, setUsers] = useState<UserWithStatut[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterStatut, setFilterStatut] = useState<string>('en_attente');
+  const [filterStatut, setFilterStatut] = useState<string>('tous');
 
   useEffect(() => {
     const { getAllUsers } = B_users();
     getAllUsers()
       .then((data: any[]) => {
-        const mapped: UserWithStatut[] = (Array.isArray(data) ? data : []).map((u) => ({
-          ...u,
-          statut: (u.statut as Statut) ?? 'en_attente',
-        }));
+        const mapped: UserWithStatut[] = (Array.isArray(data) ? data : [])
+          .map((u) => ({ ...u, statut: (u.statut as Statut) ?? 'en_attente' }))
+          // Validation = en attente, validés (pas encore connectés) et refusés.
+          .filter((u) => u.statut === 'en_attente' || u.statut === 'valide' || u.statut === 'refuse');
         setUsers(mapped);
       })
       .catch(() => toast.error('Impossible de charger les utilisateurs.'))
@@ -45,6 +45,7 @@ export function AdminValidationPage() {
     try {
       const { validateHabitant } = B_admin_validation();
       await validateHabitant(id);
+      // Validé → "valide" : reste dans la liste jusqu'à sa 1re connexion (qui le passera à "actif").
       setUsers((prev) =>
         prev.map((u) => (getKey(u) === id ? { ...u, statut: 'valide' } : u))
       );

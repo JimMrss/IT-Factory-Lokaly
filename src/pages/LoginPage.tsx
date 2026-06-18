@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Users, Heart, MessageCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { B_auth } from '../Composables/BRIDGE_auth';
+import { B_users } from '../Composables/BRIDGE_users';
 
 // Plus besoin de props — on utilise le contexte et le router directement
 export function LoginPage() {
@@ -37,7 +38,33 @@ export function LoginPage() {
 
     try {
       const user = await B_auth().login({ name: loginUsername, password: loginPassword });
-      login({ user_id: user.user_id, name: user.username ?? user.identifier, email: user.mail ?? user.email, password: loginPassword });
+      // La réponse de /auth/login/ ne contient ni `permissions` ni `statut`.
+      // On récupère le profil complet depuis la liste des utilisateurs.
+      let me: any = null;
+      try {
+        const all = await B_users().getAllUsers();
+        me = (Array.isArray(all) ? all : []).find((u: any) =>
+          (user.user_id != null && u.user_id === user.user_id) ||
+          u.identifier === loginUsername
+        );
+      } catch { /* profil indisponible : on continue avec les infos du login */ }
+
+      // Statuts qui interdisent la connexion.
+      const statut: string | undefined = me?.statut;
+      const blocked: Record<string, string> = {
+        desactive: 'Votre compte est désactivé. Contactez un administrateur.',
+        en_attente: 'Votre compte est en attente de validation par un administrateur.',
+        refuse: 'Votre compte a été refusé. Contactez un administrateur.',
+      };
+      if (statut && blocked[statut]) {
+        setError(blocked[statut]);
+        setIsLoading(false);
+        return;
+      }
+      // Un compte "valide" peut se connecter : le backend le bascule lui-même en "actif".
+
+      const permissions = me?.permissions ?? user.permissions;
+      login({ user_id: user.user_id, name: user.username ?? user.identifier, email: user.mail ?? user.email, password: loginPassword, permissions });
       navigate('/');
     } catch {
       setError('Identifiants incorrects');
@@ -68,7 +95,8 @@ export function LoginPage() {
 
     try {
       const user = await B_auth().register({ name: registerUsername, mail: registerEmail, password: registerPassword });
-      login({ user_id: user.user_id, name: user.username ?? user.identifier, email: user.mail ?? user.email, password: registerPassword });
+      // Un nouvel inscrit n'est jamais admin (permissions: 0 côté backend).
+      login({ user_id: user.user_id, name: user.username ?? user.identifier, email: user.mail ?? user.email, password: registerPassword, permissions: user.permissions ?? 0 });
       navigate('/');
     } catch {
       setError("Erreur lors de l'inscription. Réessayez.");

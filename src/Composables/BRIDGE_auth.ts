@@ -1,12 +1,14 @@
 import { api } from './apiConnect'
 
-const authorizedFields: (keyof AuthPayload)[] = ['name','surname','mail','password'];
+const authorizedFields: (keyof AuthPayload)[] = ['name','surname','mail','password', 'permissions','statut'];
 export interface AuthPayload {
     user_id?: number;
     name?: string;
     surname?: string;
     mail?: string;
     password?: string;
+    permissions?: number;  
+    statut?: string;    
 }
 export function B_auth() {
     const login = async (payload: AuthPayload): Promise<any> => {
@@ -28,6 +30,7 @@ export function B_auth() {
                 rPayload[k] = payload[k] as any;
             }
         }
+        if(!rPayload.permissions) rPayload.permissions = 0;
         const res = await api.post('/auth/register/', rPayload);
         return res.data;
     }

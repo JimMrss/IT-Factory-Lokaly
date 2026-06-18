@@ -12,6 +12,7 @@ import { AdminLayout } from './layouts/AdminLayout';
 
 // On importe le composant de protection
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminRoute } from './components/AdminRoute';
 
 // On importe la page d'erreur personnalisée
 import { ErrorPage } from './pages/ErrorPage';
@@ -96,8 +97,11 @@ export const router = createBrowserRouter([
     path: '/admin',
     errorElement: <ErrorPage />,
     element: (
+      // ProtectedRoute : login requis — AdminRoute : réservé aux admins (permissions === 1)
       <ProtectedRoute>
-        <AdminLayout />
+        <AdminRoute>
+          <AdminLayout />
+        </AdminRoute>
       </ProtectedRoute>
     ),
     children: [

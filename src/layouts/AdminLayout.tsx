@@ -18,7 +18,7 @@ export function AdminLayout() {
 
       {/* Contenu de la page admin à droite */}
       <main className="flex-1 lg:ml-0 overflow-x-hidden">
-        <div className="p-4 sm:p-6 lg:p-8">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
           {/* react-router affiche ici la bonne page admin */}
           <Outlet />
         </div>

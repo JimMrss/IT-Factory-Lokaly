@@ -13,7 +13,7 @@ export interface UserPayload {
 }
 
 const authorizedFields: (keyof UserPayload)[] = [
-  "bio", "centresInteret", "competences", "objetsDisponibles", "contactExterne"
+  "bio", "centresInteret", "competences", "objetsDisponibles", "contactExterne",
 ];
 
 function filterPayload(payload: Record<string, any>): Partial<UserPayload> {

@@ -10,6 +10,7 @@ interface User {
   name: string;
   email?: string;
   password: string;
+  permissions?: number; // 0 = utilisateur, 1 = admin
 }
 
 // On définit ce que notre contexte va exposer aux composants
