@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '../components/Card';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { Save, Eye, Upload, Plus, X, MapPin } from 'lucide-react';
+import { B_admin_customization } from '../Composables/Admin';
 import { toast } from 'sonner';
 
 interface AdminCustomizationPageProps {
@@ -31,15 +32,26 @@ export function AdminCustomizationPage({ communaute }: AdminCustomizationPagePro
   const [logoUrl, setLogoUrl] = useState('');
   const [messageAccueil, setMessageAccueil] = useState('Bienvenue dans votre communauté !');
 
-  // États pour les tags région
-  const [tagsRegion, setTagsRegion] = useState<string[]>([
-    'Centre-ville',
-    'Quartier Nord',
-    'Quartier Sud',
-    'Salle Polyvalente',
-  ]);
+  // États pour les tags région (chargés depuis l'API)
+  const [tagsRegion, setTagsRegion] = useState<string[]>([]);
   const [nouveauTagRegion, setNouveauTagRegion] = useState('');
+  const [saving, setSaving] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
+
+  // Chargement des paramètres de la communauté depuis l'API
+  useEffect(() => {
+    const { getCommunauteSettings } = B_admin_customization();
+    getCommunauteSettings()
+      .then((settings) => {
+        if (settings.couleur) setCouleurPrimaire(settings.couleur);
+        if (settings.logo) setLogoUrl(settings.logo);
+        if (settings.messageAccueil) setMessageAccueil(settings.messageAccueil);
+        if (Array.isArray(settings.tagsRegion)) setTagsRegion(settings.tagsRegion);
+      })
+      // L'endpoint /communaute/settings/ n'existe pas encore côté API :
+      // on garde silencieusement les valeurs par défaut locales.
+      .catch(() => {});
+  }, []);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,10 +62,26 @@ export function AdminCustomizationPage({ communaute }: AdminCustomizationPagePro
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setSaving(true);
+    // On applique toujours les couleurs localement (effet immédiat),
+    // puis on tente de persister via l'API si l'endpoint existe.
     document.documentElement.style.setProperty('--color-primary', couleurPrimaire);
     document.documentElement.style.setProperty('--color-secondary', couleurSecondaire);
-    toast.success('Personnalisation enregistrée et appliquée !');
+    try {
+      const { updateCommunauteSettings } = B_admin_customization();
+      await updateCommunauteSettings({
+        couleur: couleurPrimaire,
+        logo: logoUrl || null,
+        messageAccueil,
+        tagsRegion,
+      });
+      toast.success('Personnalisation enregistrée et appliquée !');
+    } catch {
+      toast.success('Personnalisation appliquée localement (API non disponible).');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const applyColorPreset = (preset: typeof COLOR_PRESETS[0]) => {
@@ -347,8 +375,9 @@ export function AdminCustomizationPage({ communaute }: AdminCustomizationPagePro
               icon={<Save size={20} />}
               fullWidth
               onClick={handleSave}
+              disabled={saving}
             >
-              Enregistrer
+              {saving ? 'Enregistrement...' : 'Enregistrer'}
             </Button>
           </div>
         </div>

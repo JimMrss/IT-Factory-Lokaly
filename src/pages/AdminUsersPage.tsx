@@ -6,6 +6,7 @@ import { Badge } from '../components/Badge';
 import { UserPlus, Search, Eye, EyeOff, Key } from 'lucide-react';
 import { B_users } from '../Composables/BRIDGE_users';
 import { B_auth } from '../Composables/BRIDGE_auth';
+import { B_admin_users } from '../Composables/Admin';
 import { toast } from 'sonner';
 
 export function AdminUsersPage() {
@@ -24,12 +25,19 @@ export function AdminUsersPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // L'API renvoie le nom complet dans le champ `nom` (et l'email dans `mail`).
+  const getNom = (u: any) => (u.nom ?? `${u.name ?? ''} ${u.surname ?? ''}`).trim();
+  const getInitials = (u: any) => {
+    const parts = getNom(u).split(/\s+/).filter(Boolean);
+    return ((parts[0]?.[0] ?? '?') + (parts[1]?.[0] ?? '')).toUpperCase();
+  };
+
   const filteredUsers = users.filter((user) => {
     const q = searchTerm.toLowerCase();
     return (
-      (user.surname ?? '').toLowerCase().includes(q) ||
-      (user.name ?? '').toLowerCase().includes(q) ||
-      (user.identifier ?? '').toLowerCase().includes(q)
+      getNom(user).toLowerCase().includes(q) ||
+      (user.identifier ?? '').toLowerCase().includes(q) ||
+      (user.mail ?? '').toLowerCase().includes(q)
     );
   });
 
@@ -52,16 +60,31 @@ export function AdminUsersPage() {
     }
   };
 
-  const handleToggleStatus = (user: any) => {
-    const newStatut = user.statut === 'actif' ? 'desactive' : 'actif';
-    setUsers((prev) =>
-      prev.map((u) => (u.user_id === user.user_id ? { ...u, statut: newStatut } : u))
-    );
-    toast.success(`Utilisateur ${user.name} ${user.surname} ${newStatut === 'actif' ? 'activé' : 'désactivé'}.`);
+  const handleToggleStatus = async (user: any) => {
+    const id = user.user_id ?? user.id;
+    const newStatut: 'actif' | 'desactive' = user.statut === 'actif' ? 'desactive' : 'actif';
+    try {
+      const { toggleUserStatus } = B_admin_users();
+      await toggleUserStatus(id, newStatut);
+      setUsers((prev) =>
+        prev.map((u) => ((u.user_id ?? u.id) === id ? { ...u, statut: newStatut } : u))
+      );
+      toast.success(`Utilisateur ${getNom(user)} ${newStatut === 'actif' ? 'activé' : 'désactivé'}.`);
+    } catch {
+      toast.error('Erreur lors de la mise à jour du statut.');
+    }
   };
 
-  const handleResetPassword = (user: any) => {
-    toast.success(`Nouveau mot de passe généré pour ${user.name} ${user.surname}.`);
+  const handleResetPassword = async (user: any) => {
+    const newPassword = window.prompt(`Nouveau mot de passe pour ${getNom(user)} :`);
+    if (!newPassword) return;
+    try {
+      const { resetUserPassword } = B_admin_users();
+      await resetUserPassword(user.user_id ?? user.id, newPassword);
+      toast.success(`Mot de passe réinitialisé pour ${getNom(user)}.`);
+    } catch {
+      toast.error('Erreur lors de la réinitialisation du mot de passe.');
+    }
   };
 
   return (
@@ -127,10 +150,10 @@ export function AdminUsersPage() {
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full flex items-center justify-center">
                             <span className="text-white font-medium">
-                              {(user.name ?? '?').charAt(0)}{(user.surname ?? '?').charAt(0)}
+                              {getInitials(user)}
                             </span>
                           </div>
-                          <p className="font-medium">{user.name} {user.surname}</p>
+                          <p className="font-medium">{getNom(user)}</p>
                         </div>
                       </td>
                       <td className="p-4">
