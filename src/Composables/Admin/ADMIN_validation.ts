@@ -1,11 +1,6 @@
 import { api } from "../apiConnect";
 import type { HabitantEnAttente } from "../../types";
 
-const getPendingHabitants = async (): Promise<HabitantEnAttente[]> => {
-  const res = await api.get("/users", { params: { statut: "en_attente" } });
-  return res.data;
-};
-
 const validateHabitant = async (id: number | string): Promise<HabitantEnAttente> => {
   // Validé = "valide" : l'utilisateur passera à "actif" lors de sa 1re connexion.
   const res = await api.patch(`/users/${id}`, { statut: "valide" });
@@ -19,7 +14,6 @@ const refuseHabitant = async (id: number | string): Promise<HabitantEnAttente> =
 
 export function B_admin_validation() {
   return {
-    getPendingHabitants,
     validateHabitant,
     refuseHabitant,
   };
