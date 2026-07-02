@@ -78,7 +78,8 @@ export function AdminCustomizationPage({ communaute }: AdminCustomizationPagePro
       });
       toast.success('Personnalisation enregistrée et appliquée !');
     } catch {
-      toast.success('Personnalisation appliquée localement (API non disponible).');
+      // échec = rien n'est persisté : ne pas afficher un succès trompeur
+      toast.error('Enregistrement impossible : le serveur ne répond pas. Les couleurs ne sont appliquées que sur cet écran et seront perdues au rechargement.');
     } finally {
       setSaving(false);
     }
