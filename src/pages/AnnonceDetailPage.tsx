@@ -7,14 +7,17 @@ import { MapPin, Calendar, Heart, ArrowLeft, MessageCircle } from 'lucide-react'
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { B_Annonces } from '../Composables/BRIDGE_annonces';
 import { B_users } from '../Composables/BRIDGE_users';
+import { useAuth } from '../context/AuthContext';
 
 export function AnnonceDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [annonce, setAnnonce] = useState<any>(null);
   const [auteur, setAuteur] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [interested, setInterested] = useState(false);
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -28,6 +31,10 @@ export function AnnonceDetailPage() {
       data = await B_Annonces().getAnnonces(id!);
       console.log('annonce chargée:', data);
       setAnnonce(data);
+      // si l'utilisateur est déjà dans la liste des intéressés, on coche direct
+      if (user?.user_id && data.interested_users?.includes(user.user_id)) {
+        setInterested(true);
+      }
     } catch (err) {
       console.log('annonce introuvable:', err);
       setLoading(false);
@@ -72,10 +79,22 @@ export function AnnonceDetailPage() {
     nomAuteur = auteur.nom;
   }
 
-  const handleInterest = () => {
-    setInterested(true);
-    alert('Merci pour votre intérêt ! Vous pouvez maintenant contacter l\'auteur via le lien ci-dessous.');
+  // L'endpoint est un toggle : un clic ajoute l'intérêt, un second le retire
+  const handleInterest = async () => {
+    if (!user?.user_id || sending) return;
+    setSending(true);
+    try {
+      const updated = await B_Annonces().toggleInterest(annonce.annonce_id, user.user_id);
+      setAnnonce(updated);
+      setInterested(updated.interested_users?.includes(user.user_id) ?? false);
+    } catch (err) {
+      console.log('erreur toggle intérêt:', err);
+    }
+    setSending(false);
   };
+
+  // l'auteur de l'annonce n'a pas de raison de se déclarer intéressé
+  const isAuthor = user?.user_id != null && user.user_id === annonce.provider;
 
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
@@ -140,18 +159,20 @@ export function AnnonceDetailPage() {
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-[var(--color-border)]">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  icon={<Heart size={20} />}
-                  onClick={handleInterest}
-                  disabled={interested}
-                >
-                  {interested ? 'Intérêt manifesté ✓' : 'Je suis intéressé·e'}
-                </Button>
-              </div>
+              {!isAuthor && (
+                <div className="pt-6 border-t border-[var(--color-border)]">
+                  <Button
+                    variant={interested ? 'outline' : 'primary'}
+                    size="lg"
+                    fullWidth
+                    icon={<Heart size={20} />}
+                    onClick={handleInterest}
+                    disabled={sending}
+                  >
+                    {interested ? 'Intérêt manifesté ✓ (cliquer pour retirer)' : 'Je suis intéressé·e'}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </Card>
