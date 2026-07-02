@@ -5,6 +5,7 @@
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { CommunauteProvider } from "./context/CommunauteContext";
 import { router } from "./router";
 import "./styles/globals.css";
 
@@ -12,8 +13,11 @@ import "./styles/globals.css";
 createRoot(document.getElementById("root")!).render(
   // AuthProvider rend les infos de connexion disponibles partout
   <AuthProvider>
-    {/* RouterProvider active le système de routing de react-router-dom */}
-    <RouterProvider router={router} />
+    {/* CommunauteProvider charge la personnalisation (couleurs, logo, message) pour tout le site */}
+    <CommunauteProvider>
+      {/* RouterProvider active le système de routing de react-router-dom */}
+      <RouterProvider router={router} />
+    </CommunauteProvider>
   </AuthProvider>
 );
   

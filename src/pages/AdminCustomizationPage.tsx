@@ -6,6 +6,7 @@ import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { Save, Eye, Upload, Plus, X, MapPin } from 'lucide-react';
 import { B_admin_customization } from '../Composables/Admin';
+import { useCommunaute } from '../context/CommunauteContext';
 import { toast } from 'sonner';
 
 interface AdminCustomizationPageProps {
@@ -37,6 +38,9 @@ export function AdminCustomizationPage({ communaute }: AdminCustomizationPagePro
   const [nouveauTagRegion, setNouveauTagRegion] = useState('');
   const [saving, setSaving] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
+
+  // pour resynchroniser le header/l'accueil après une sauvegarde
+  const { refreshSettings } = useCommunaute();
 
   // Chargement des paramètres de la communauté depuis l'API
   useEffect(() => {
@@ -76,6 +80,7 @@ export function AdminCustomizationPage({ communaute }: AdminCustomizationPagePro
         messageAccueil,
         tagsRegion,
       });
+      refreshSettings();
       toast.success('Personnalisation enregistrée et appliquée !');
     } catch {
       // échec = rien n'est persisté : ne pas afficher un succès trompeur

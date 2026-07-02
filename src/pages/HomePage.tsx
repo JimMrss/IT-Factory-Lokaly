@@ -8,11 +8,13 @@ import { B_Annonces } from '../Composables/BRIDGE_annonces';
 import { B_groupes } from '../Composables/BRIDGE_groupe';
 import { B_users } from '../Composables/BRIDGE_users';
 import { useAuth } from '../context/AuthContext';
+import { useCommunaute } from '../context/CommunauteContext';
 import { toast } from 'sonner';
 
 export function HomePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { settings } = useCommunaute();
   // permissions : 0 = utilisateur, 1 = admin (tolérant si l'API renvoie une chaîne "1")
   const isAdmin = !!user && Number(user.permissions) === 1;
   const [annonces, setAnnonces] = useState<any[]>([]);
@@ -62,7 +64,7 @@ export function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
-              Bienvenue dans votre communauté
+              {settings?.messageAccueil || 'Bienvenue dans votre communauté'}
             </h1>
             <p className="text-lg text-white opacity-90 mb-8">
               Lokaly facilite l'entraide et les échanges entre voisins.
