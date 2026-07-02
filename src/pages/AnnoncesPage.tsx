@@ -53,6 +53,9 @@ export function AnnoncesPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // types réellement présents dans les annonces (l'ancienne liste en dur ne correspondait pas aux données)
+  const typesDisponibles = [...new Set(annonces.map((a) => a.type).filter(Boolean))];
+
   // construit la liste filtrée
   const getAnnoncesFiltrées = () => {
     const resultat = [];
@@ -148,13 +151,7 @@ export function AnnoncesPage() {
                 placeholder="Tous les types"
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                options={[
-                  { value: '', label: 'Tous les types' },
-                  { value: 'Don', label: 'Don' },
-                  { value: 'Prêt', label: 'Prêt' },
-                  { value: 'Service', label: 'Service' },
-                  { value: 'Atelier', label: 'Atelier' },
-                ]}
+                options={typesDisponibles.map((t) => ({ value: t, label: t }))}
               />
             </div>
           )}
