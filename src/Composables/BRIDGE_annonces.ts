@@ -6,7 +6,8 @@ export function B_Annonces() {
     getAllAnnonces,
     createAnnonce,
     updateAnnonce,
-    deleteAnnonce
+    deleteAnnonce,
+    toggleInterest
   }
 }
 
@@ -71,5 +72,12 @@ const updateAnnonce = async (id: number | string, payload: AnnoncePayload): Prom
 // Fonction pour supprimer une annonce
 const deleteAnnonce = async (id: number | string): Promise<any> => {
   const res = await api.delete(`/annonces/${id}`);
+  return res.data;
+}
+
+// Ajoute ou retire l'utilisateur de la liste des intéressés (toggle côté serveur)
+// L'API demande l'id de l'annonce en query en plus du path, et renvoie l'annonce mise à jour
+const toggleInterest = async (id: number | string, userId: number): Promise<any> => {
+  const res = await api.post(`/annonces/${id}/interest/`, { user_id: userId }, { params: { annonceId: id } });
   return res.data;
 }
