@@ -77,14 +77,15 @@ export function ProfilPage() {
     if (!user?.user_id) return;
     setSaving(true);
     try {
-      const updated = await B_users().updateUser(user.user_id, {
+      await B_users().updateUser(user.user_id, {
         bio,
         contactExterne,
         objetsDisponibles,
         centresInteret,
         competences,
       });
-      setProfil(updated);
+      // la réponse du PATCH renvoie l'objet AVANT modification : on garde nos valeurs locales
+      setProfil({ ...profil, bio, contactExterne, objetsDisponibles, centresInteret, competences });
       toast.success('Profil enregistré avec succès !');
       setIsEditing(false);
     } catch {

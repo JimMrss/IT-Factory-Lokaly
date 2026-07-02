@@ -7,6 +7,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCommunaute } from '../context/CommunauteContext';
 import { Home, FileText, Users, User, Menu, X, LogOut } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
 
@@ -22,6 +23,9 @@ export function Header({ communityName = 'Commune de Tori' }: { communityName?: 
 
   // useAuth donne accès à l'utilisateur connecté et à logout
   const { user, logout } = useAuth();
+
+  // settings de la communauté (logo personnalisé si défini par l'admin)
+  const { settings } = useCommunaute();
 
   // Liste des liens de navigation avec leur URL
   const navItems = [
@@ -56,8 +60,12 @@ export function Header({ communityName = 'Commune de Tori' }: { communityName?: 
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => navigate('/')}
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">L</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-lg flex items-center justify-center overflow-hidden">
+                {settings?.logo ? (
+                  <img src={settings.logo} alt="Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-white font-bold text-xl">L</span>
+                )}
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-lg text-[var(--color-primary)]">Lokaly</span>
