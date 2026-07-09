@@ -26,7 +26,7 @@ export function AnnonceDetailPage() {
 
   const chargerAnnonce = async () => {
     // on charge l'annonce d'abord
-    let data = null;
+    let data;
     try {
       data = await B_Annonces().getAnnonces(id!);
       console.log('annonce chargée:', data);
@@ -47,7 +47,7 @@ export function AnnonceDetailPage() {
         const userInfo = await B_users().getUser(data.provider);
         console.log('auteur:', userInfo);
         setAuteur(userInfo);
-      } catch (err) {
+      } catch {
         console.log('auteur pas trouvé, pas grave');
       }
     }

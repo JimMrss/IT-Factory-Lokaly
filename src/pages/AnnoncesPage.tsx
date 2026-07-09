@@ -8,19 +8,6 @@ import { B_Annonces } from '../Composables/BRIDGE_annonces';
 import { B_users } from '../Composables/BRIDGE_users';
 import { toast } from 'sonner';
 
-const mapAnnonce = (a: any, users: any[]) => {
-  const user = users.find((u) => u.user_id === a.provider);
-  return {
-    id: String(a.annonce_id),
-    name: a.name,
-    description: a.description,
-    location: a.location,
-    disponibilite: a.disponibilite || (a.date ? `${a.date}${a.hour ? ' ' + a.hour : ''}` : ''),
-    type: a.type || a.state || '',
-    auteur: { nom: user ? `${user.name} ${user.surname}` : 'Membre de la communauté' },
-  };
-};
-
 export function AnnoncesPage() {
   const navigate = useNavigate();
   const [annonces, setAnnonces] = useState<any[]>([]);
