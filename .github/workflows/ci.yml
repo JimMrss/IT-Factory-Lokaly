@@ -28,5 +28,11 @@ jobs:
       - name: Installation des dependances
         run: npm ci
 
+      - name: Qualite du code (lint)
+        run: npm run lint
+
+      - name: Tests unitaires
+        run: npm test
+
       - name: Build de l'application
         run: npm run build
