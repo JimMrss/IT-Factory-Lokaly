@@ -10,7 +10,7 @@ export interface UserPayload {
   competences?: string[];
   objetsDisponibles?: string[];
   contactExterne?: string;
-  statut?: "actif" | "desactive";
+  statut?: "en_attente" | "valide" | "actif" | "refuse" | "desactive";
 }
 
 const authorizedFields: (keyof UserPayload)[] = [
