@@ -40,4 +40,20 @@ describe('B_Evenements', () => {
     expect(mockedApi.get).toHaveBeenCalledWith('/evenements/7')
     expect(result).toEqual(evenement)
   })
+
+  it('createEvenement ne garde que les champs autorises', async () => {
+    mockedApi.post.mockResolvedValue({ data: { id: 10 } })
+
+    const { createEvenement } = B_Evenements()
+    await createEvenement({
+      name: 'Atelier compost',
+      date: '2026-08-20',
+      champInterdit: 'ne doit pas passer',
+    } as never)
+
+    expect(mockedApi.post).toHaveBeenCalledWith('/evenements/', {
+      name: 'Atelier compost',
+      date: '2026-08-20',
+    })
+  })
 })
