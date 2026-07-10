@@ -29,4 +29,15 @@ describe('B_Evenements', () => {
     expect(mockedApi.get).toHaveBeenCalledWith('/evenements/')
     expect(result).toEqual(evenements)
   })
+
+  it('getEvenements recupere un evenement par son id', async () => {
+    const evenement = { id: 7, name: 'Vide-grenier', date: '2026-09-01' }
+    mockedApi.get.mockResolvedValue({ data: evenement })
+
+    const { getEvenements } = B_Evenements()
+    const result = await getEvenements(7)
+
+    expect(mockedApi.get).toHaveBeenCalledWith('/evenements/7')
+    expect(result).toEqual(evenement)
+  })
 })
