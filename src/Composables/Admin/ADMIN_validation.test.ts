@@ -25,4 +25,14 @@ describe('B_admin_validation', () => {
     expect(mockedApi.patch).toHaveBeenCalledWith('/users/8', { statut: 'valide' })
     expect(result.statut).toBe('valide')
   })
+
+  it('refuseHabitant passe le statut a refuse', async () => {
+    mockedApi.patch.mockResolvedValue({ data: { id: 9, statut: 'refuse' } })
+
+    const { refuseHabitant } = B_admin_validation()
+    const result = await refuseHabitant(9)
+
+    expect(mockedApi.patch).toHaveBeenCalledWith('/users/9', { statut: 'refuse' })
+    expect(result.statut).toBe('refuse')
+  })
 })
