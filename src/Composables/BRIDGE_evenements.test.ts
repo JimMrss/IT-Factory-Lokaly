@@ -66,4 +66,14 @@ describe('B_Evenements', () => {
     expect(mockedApi.patch).toHaveBeenCalledWith('/evenements/5', { location: 'Salle des fetes' })
     expect(result.location).toBe('Salle des fetes')
   })
+
+  it('deleteEvenement appelle le DELETE sur le bon id', async () => {
+    mockedApi.delete.mockResolvedValue({ data: { success: true } })
+
+    const { deleteEvenement } = B_Evenements()
+    const result = await deleteEvenement(12)
+
+    expect(mockedApi.delete).toHaveBeenCalledWith('/evenements/12')
+    expect(result.success).toBe(true)
+  })
 })
