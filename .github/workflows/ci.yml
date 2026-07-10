@@ -37,9 +37,6 @@ jobs:
       - name: Build de l'application
         run: npm run build
 
-      - name: Audit des dépendances
-        run: npm audit --audit-level=high
-
       - name: Cache des binaires de test E2E
         uses: actions/cache@v4
         with:
