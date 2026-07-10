@@ -83,4 +83,24 @@ describe('B_admin_stats', () => {
       taux_participation: 0,
     })
   })
+
+  it('getMonthlyActivity regroupe annonces et evenements par mois', async () => {
+    mockedAnnonces.mockReturnValue({
+      getAllAnnonces: vi.fn().mockResolvedValue([
+        { id: 1, date: '2026-07-01' },
+        { id: 2, date: '2026-07-15' },
+      ]),
+    } as never)
+    mockedEvenements.mockReturnValue({
+      getAllEvenements: vi.fn().mockResolvedValue([{ id: 1, date: '2026-09-02' }]),
+    } as never)
+
+    const { getMonthlyActivity } = B_admin_stats()
+    const result = await getMonthlyActivity()
+
+    expect(result).toEqual([
+      { mois: 'Juil', annonces: 2, evenements: 0 },
+      { mois: 'Sept', annonces: 0, evenements: 1 },
+    ])
+  })
 })
