@@ -56,4 +56,14 @@ describe('B_Evenements', () => {
       date: '2026-08-20',
     })
   })
+
+  it('updateEvenement envoie un PATCH sur le bon id', async () => {
+    mockedApi.patch.mockResolvedValue({ data: { id: 5, location: 'Salle des fetes' } })
+
+    const { updateEvenement } = B_Evenements()
+    const result = await updateEvenement(5, { location: 'Salle des fetes' })
+
+    expect(mockedApi.patch).toHaveBeenCalledWith('/evenements/5', { location: 'Salle des fetes' })
+    expect(result.location).toBe('Salle des fetes')
+  })
 })
