@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         // JSON.parse convertit le texte stocké en objet JavaScript
         setUser(JSON.parse(savedUser));
-      } catch (e) {
+      } catch {
         // Si le texte stocké est corrompu, on le supprime
         localStorage.removeItem('lokaly_user');
       }

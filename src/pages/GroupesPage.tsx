@@ -16,7 +16,7 @@ export function GroupesPage() {
   }, []);
 
   const chargerGroupes = async () => {
-    let res = null;
+    let res;
     try {
       res = await B_groupes().getAllGroups();
       console.log('groupes récupérés:', res);

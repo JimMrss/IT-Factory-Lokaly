@@ -33,16 +33,15 @@ export function CreerGroupePage() {
 
     setLoading(true);
 
-    let res = null;
     try {
-      res = await B_groupes().createGroup({
+      const res = await B_groupes().createGroup({
         name,
         description,
         category: categorie,
         niveau: "1",
-        idAdmin: user?.user_id,
+        idAdmin: user.user_id,
       } as any);
-      await B_groupes().addMemberToGroup(res.group_id, user?.user_id!);
+      await B_groupes().addMemberToGroup(res.group_id, user.user_id);
       toast.success('Groupe créé avec succès ! Il commencera au Niveau 1.');
       navigate('/groupes');
     } catch (err) {
