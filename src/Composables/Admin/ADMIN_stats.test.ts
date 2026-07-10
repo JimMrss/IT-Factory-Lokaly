@@ -36,4 +36,21 @@ describe('B_admin_stats', () => {
       { name: 'Autre', value: 1 },
     ])
   })
+
+  it('getStatsByGroup compte annonces et membres par groupe', async () => {
+    mockedGroupes.mockReturnValue({
+      getAllGroups: vi.fn().mockResolvedValue([
+        { name: 'Quartier Nord', annonces: [{ id: 1 }, { id: 2 }], members: [{ id: 1 }] },
+        { name: 'Quartier Sud' },
+      ]),
+    } as never)
+
+    const { getStatsByGroup } = B_admin_stats()
+    const result = await getStatsByGroup()
+
+    expect(result).toEqual([
+      { name: 'Quartier Nord', annonces: 2, membres: 1 },
+      { name: 'Quartier Sud', annonces: 0, membres: 0 },
+    ])
+  })
 })
