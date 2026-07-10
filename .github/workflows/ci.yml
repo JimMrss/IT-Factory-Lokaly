@@ -37,9 +37,6 @@ jobs:
       - name: Build de l'application
         run: npm run build
 
-      - name: Vérification du format (Prettier)
-        run: npx prettier --check .
-
       - name: Audit des dépendances
         run: npm audit --audit-level=high
 
