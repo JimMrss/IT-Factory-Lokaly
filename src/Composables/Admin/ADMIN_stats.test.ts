@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { B_admin_stats } from './ADMIN_stats'
 import { B_Annonces } from '../BRIDGE_annonces'
 import { B_groupes } from '../BRIDGE_groupe'
+import { B_users } from '../BRIDGE_users'
+import { B_Evenements } from '../BRIDGE_evenements'
 
 // On mocke les bridges pour ne pas appeler la vraie API
 vi.mock('../BRIDGE_annonces', () => ({ B_Annonces: vi.fn() }))
@@ -11,6 +13,8 @@ vi.mock('../BRIDGE_evenements', () => ({ B_Evenements: vi.fn() }))
 
 const mockedAnnonces = vi.mocked(B_Annonces)
 const mockedGroupes = vi.mocked(B_groupes)
+const mockedUsers = vi.mocked(B_users)
+const mockedEvenements = vi.mocked(B_Evenements)
 
 describe('B_admin_stats', () => {
   beforeEach(() => {
@@ -52,5 +56,31 @@ describe('B_admin_stats', () => {
       { name: 'Quartier Nord', annonces: 2, membres: 1 },
       { name: 'Quartier Sud', annonces: 0, membres: 0 },
     ])
+  })
+
+  it('getDashboardStats totalise chaque ressource', async () => {
+    mockedAnnonces.mockReturnValue({
+      getAllAnnonces: vi.fn().mockResolvedValue([{ id: 1 }, { id: 2 }, { id: 3 }]),
+    } as never)
+    mockedUsers.mockReturnValue({
+      getAllUsers: vi.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
+    } as never)
+    mockedGroupes.mockReturnValue({
+      getAllGroups: vi.fn().mockResolvedValue([{ id: 1 }]),
+    } as never)
+    mockedEvenements.mockReturnValue({
+      getAllEvenements: vi.fn().mockResolvedValue([]),
+    } as never)
+
+    const { getDashboardStats } = B_admin_stats()
+    const result = await getDashboardStats()
+
+    expect(result).toEqual({
+      total_annonces: 3,
+      total_users: 2,
+      total_groupes: 1,
+      total_evenements: 0,
+      taux_participation: 0,
+    })
   })
 })
