@@ -25,4 +25,14 @@ describe('B_admin_users', () => {
     expect(mockedApi.patch).toHaveBeenCalledWith('/users/4', { statut: 'desactive' })
     expect(result.statut).toBe('desactive')
   })
+
+  it('setUserPermissions passe un utilisateur admin', async () => {
+    mockedApi.patch.mockResolvedValue({ data: { id: 2, permissions: 1 } })
+
+    const { setUserPermissions } = B_admin_users()
+    const result = await setUserPermissions(2, 1)
+
+    expect(mockedApi.patch).toHaveBeenCalledWith('/users/2', { permissions: 1 })
+    expect(result.permissions).toBe(1)
+  })
 })
