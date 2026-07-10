@@ -27,6 +27,13 @@ describe('B_admin_groupes', () => {
     expect(result).toEqual(groupes)
   })
 
-  // A implementer : le composable doit proteger les pages admin d une reponse vide
-  it.todo('getAllGroupsAdmin renvoie un tableau vide si l API renvoie null')
+  // Le composable doit proteger les pages admin d une reponse vide
+  it('getAllGroupsAdmin renvoie un tableau vide si l API renvoie null', async () => {
+    mockedApi.get.mockResolvedValue({ data: null })
+
+    const { getAllGroupsAdmin } = B_admin_groupes()
+    const result = await getAllGroupsAdmin()
+
+    expect(result).toEqual([])
+  })
 })
