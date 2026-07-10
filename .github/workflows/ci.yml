@@ -36,3 +36,9 @@ jobs:
 
       - name: Build de l'application
         run: npm run build
+
+      - name: Cache des binaires de test E2E
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
